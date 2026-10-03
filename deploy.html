@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>部署手册 — easytier-cf-relay</title>
+<meta name="description" content="EasyTier Cloudflare Relay 部署手册：5 分钟部署、wrangler.toml 全部配置项、域名绑定、客户端接入（CLI / GUI / Docker）、成本额度、运维与 FAQ。">
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/layout.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="EasyTier CF Relay 图标" width="30" height="30">
+      <span>easytier-cf-relay</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+        <a href="index.html">主页</a>
+        <a href="generator.html">配置生成器</a>
+        <a href="deploy.html" class="active" aria-current="page">部署手册</a>
+        <a href="technical.html">技术文档</a>
+        <a href="changelog.html">更新日志</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+        <svg class="icon-sun" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13ZM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8Z"/><path d="M2.343 2.343a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.06ZM2.343 13.657a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 1 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12.63 2.75A7 7 0 1 0 12.63 13.25 5.5 5.5 0 1 1 12.63 2.75Z"/></svg>
+      </button>
+      <a class="btn btn-sm github-btn" href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg><span class="github-label">GitHub</span>
+      </a>
+      <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-label="展开导航" aria-expanded="false">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar" aria-label="本页目录">
+    <p class="toc-title">本页目录</p>
+    <ul>
+          <li class="toc-h2"><a href="#1-架构概览">1. 架构概览</a></li>
+          <li class="toc-h2"><a href="#2-前置条件">2. 前置条件</a></li>
+          <li class="toc-h2"><a href="#3-快速部署5-分钟">3. 快速部署（5 分钟）</a></li>
+          <li class="toc-h2"><a href="#4-绑定自定义域名">4. 绑定自定义域名</a></li>
+          <li class="toc-h3"><a href="#方式-acustom-domain推荐">方式 A：Custom Domain（推荐）</a></li>
+          <li class="toc-h3"><a href="#方式-broute-手动-dns">方式 B：Route + 手动 DNS</a></li>
+          <li class="toc-h3"><a href="#客户端-url-格式">客户端 URL 格式</a></li>
+          <li class="toc-h2"><a href="#5-配置参考">5. 配置参考</a></li>
+          <li class="toc-h3"><a href="#51-基础配置">5.1 基础配置</a></li>
+          <li class="toc-h3"><a href="#52-p2p-与转发行为">5.2 P2P 与转发行为</a></li>
+          <li class="toc-h3"><a href="#53-容量与超时">5.3 容量与超时</a></li>
+          <li class="toc-h3"><a href="#54-安全">5.4 安全</a></li>
+          <li class="toc-h3"><a href="#55-多房间分片可选">5.5 多房间分片（可选）</a></li>
+          <li class="toc-h3"><a href="#56-kv-审计记录-黑名单">5.6 KV 审计（记录 + 黑名单）</a></li>
+          <li class="toc-h3"><a href="#57-日志">5.7 日志</a></li>
+          <li class="toc-h3"><a href="#58-监控与管理端">5.8 监控与管理端</a></li>
+          <li class="toc-h2"><a href="#6-客户端接入">6. 客户端接入</a></li>
+          <li class="toc-h3"><a href="#61-linux-macoseasytier-core-cli">6.1 Linux / macOS（easytier-core CLI）</a></li>
+          <li class="toc-h3"><a href="#62-windows-gui-macos-gui-手机端">6.2 Windows GUI / macOS GUI / 手机端</a></li>
+          <li class="toc-h3"><a href="#63-docker">6.3 Docker</a></li>
+          <li class="toc-h3"><a href="#64-兼容性矩阵">6.4 兼容性矩阵</a></li>
+          <li class="toc-h2 toc-extended"><a href="#7-成本与额度">7. 成本与额度</a></li>
+          <li class="toc-h2 toc-extended"><a href="#8-运维日志监控升级">8. 运维：日志、监控、升级</a></li>
+          <li class="toc-h3 toc-extended"><a href="#81-健康检查与指标">8.1 健康检查与指标</a></li>
+          <li class="toc-h3 toc-extended"><a href="#82-web-管理端">8.2 Web 管理端</a></li>
+          <li class="toc-h3 toc-extended"><a href="#83-实时日志">8.3 实时日志</a></li>
+          <li class="toc-h3 toc-extended"><a href="#84-升级">8.4 升级</a></li>
+          <li class="toc-h3 toc-extended"><a href="#85-durable-object-迁移注意">8.5 Durable Object 迁移注意</a></li>
+          <li class="toc-h3 toc-extended"><a href="#86-重新生成-protobuf-静态代码仅开发">8.6 重新生成 Protobuf 静态代码（仅开发）</a></li>
+          <li class="toc-h2"><a href="#9-故障排查-faq">9. 故障排查 FAQ</a></li>
+    </ul>
+  </aside>
+
+  <main class="doc-article markdown-body">
+    <div class="doc-toolbar">
+      <div class="doc-meta">
+        对应源文件 <code>easytier-cf-relay-release/docs/部署手册.md</code> ·
+        <a href="https://github.com/WWSTA/easytier-cf-relay/blob/main/docs/%E9%83%A8%E7%BD%B2%E6%89%8B%E5%86%8C.md" target="_blank" rel="noopener noreferrer">在 GitHub 查看原文</a>
+      </div>
+      <div class="view-switch">
+        <span>阅读模式</span>
+        <div class="segmented" data-doc-view role="group" aria-label="阅读模式">
+          <button type="button" data-view="full" class="active" aria-pressed="true">完整视图</button>
+          <button type="button" data-view="refined" aria-pressed="false">精炼视图</button>
+        </div>
+      </div>
+    </div>
+
+<h1 id="easytier-cloudflare-relay-部署手册" class="heading-anchor"><a class="anchor" href="#easytier-cloudflare-relay-部署手册" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>EasyTier Cloudflare Relay — 部署手册</h1>
+<blockquote>
+<p>在 Cloudflare Workers + Durable Objects 上部署 EasyTier 自建 WebSocket 节点（纯 P2P 优先模式）。
+已用 <strong>easytier-core 2.6.4 官方客户端实测验证</strong>：握手、路由同步、双节点互见、数据中继全部通过。</p>
+</blockquote>
+<hr>
+
+
+<section class="doc-sec" id="1-架构概览-sec">
+<h2 id="1-架构概览" class="heading-anchor"><a class="anchor" href="#1-架构概览" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>1. 架构概览</h2>
+<div class="code-block" data-lang=""><pre><code>EasyTier 客户端 (任意平台)
+        │  wss://et.example.com/  (标准 WebSocket + EasyTier 二进制协议)
+        ▼
+Cloudflare Edge (Worker 入口 src/index.js)
+        │  按 URL/Header/Query 选择房间 → 转发到 Durable Object
+        ▼
+RelayRoom Durable Object (src/room.js)
+        │  握手鉴权 → 路由同步(OSPF) → 包转发
+        ▼
+同一网络的其他客户端（经中继兜底；P2P 打洞成功后直连，不再经过本节点）
+</code></pre></div>
+<p><strong>纯 P2P 模式</strong>：节点在路由协议中宣告 <code>avoid_relay_data</code>（OSPF 大代价边），
+客户端之间优先直连；只有 P2P 打洞失败的流量才走中继兜底（可通过 <code>RELAY_DATA=0</code> 完全关闭数据面）。</p>
+
+</section>
+
+<section class="doc-sec" id="2-前置条件-sec">
+<h2 id="2-前置条件" class="heading-anchor"><a class="anchor" href="#2-前置条件" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>2. 前置条件</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cloudflare 账号</td>
+<td>免费计划即可（SQLite 后端 Durable Objects 已对免费计划开放）</td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td>≥ 18（推荐 20+）</td>
+</tr>
+<tr>
+<td>Wrangler</td>
+<td>v4.x（<code>npm i -g wrangler</code> 或使用项目内 npx）</td>
+</tr>
+<tr>
+<td>自定义域名</td>
+<td>可选；域名需托管在 Cloudflare（用 Workers 默认 <code>*.workers.dev</code> 域名则不需要）</td>
+</tr>
+</tbody></table></div>
+
+</section>
+
+<section class="doc-sec" id="3-快速部署5-分钟-sec">
+<h2 id="3-快速部署5-分钟" class="heading-anchor"><a class="anchor" href="#3-快速部署5-分钟" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>3. 快速部署（5 分钟）</h2>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash"># 1. 进入项目目录
+cd easytier-cf-relay
+
+# 2. 安装依赖
+npm install
+
+# 3. 登录 Cloudflare（浏览器授权）
+npx wrangler login
+
+# 4. 部署
+npx wrangler deploy
+
+# 5. 验证（把 &lt;name&gt; 替换为 wrangler 输出的 Worker 名）
+curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
+# 期望: {&quot;ok&quot;:true}
+</code></pre></div>
+<p>客户端即可用 <code>wss://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/</code> 作为节点地址。</p>
+<blockquote>
+<p><strong>可选：启用 KV 审计（记录 + 黑名单）</strong>——创建 KV namespace 并在 wrangler.toml
+启用 <code>AUDIT_KV</code> 绑定（见 5.6 节）。不配置时功能自动降级为仅 DO storage 存储，
+管理页功能不受影响。</p>
+</blockquote>
+<blockquote>
+<p><strong>本地验证</strong>（可选，无需账号）：</p>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">npx wrangler dev --port 8787
+# 另一个终端
+curl http://127.0.0.1:8787/health
+# 期望: {&quot;ok&quot;:true}
+</code></pre></div>
+<p>本地 <code>wrangler dev</code> 如需启用统计/管理端，可创建 <code>.dev.vars</code> 文件（已 gitignore，
+不随 deploy 上传）配置 <code>METRICS_PATH</code> / <code>ADMIN_PATH</code> 等 token。</p>
+</blockquote>
+
+</section>
+
+<section class="doc-sec" id="4-绑定自定义域名-sec">
+<h2 id="4-绑定自定义域名" class="heading-anchor"><a class="anchor" href="#4-绑定自定义域名" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>4. 绑定自定义域名</h2>
+<h3 id="方式-acustom-domain推荐" class="heading-anchor"><a class="anchor" href="#方式-acustom-domain推荐" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>方式 A：Custom Domain（推荐）</h3>
+<p>域名已托管在 Cloudflare 时，在 <code>wrangler.toml</code> 追加：</p>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">routes = [
+  { pattern = &quot;et.example.com&quot;, custom_domain = true }
+]
+</code></pre></div>
+<p>重新 <code>npx wrangler deploy</code>。Cloudflare 会自动：</p>
+<ul>
+<li>创建 DNS 记录</li>
+<li>签发并轮换 TLS 证书（免费）</li>
+</ul>
+<h3 id="方式-broute-手动-dns" class="heading-anchor"><a class="anchor" href="#方式-broute-手动-dns" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>方式 B：Route + 手动 DNS</h3>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">routes = [
+  { pattern = &quot;et.example.com/*&quot;, zone_name = &quot;example.com&quot; }
+]
+</code></pre></div>
+<p>并在 Cloudflare DNS 面板为 <code>et.example.com</code> 添加任意 A/AAAA 记录（如 <code>192.0.2.1</code>，流量走 Worker 不回源）。</p>
+<h3 id="客户端-url-格式" class="heading-anchor"><a class="anchor" href="#客户端-url-格式" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>客户端 URL 格式</h3>
+<div class="code-block" data-lang=""><pre><code>wss://et.example.com/
+</code></pre></div>
+<p>路径任意（<code>/</code>、<code>/ws</code>、<code>/easytier</code> 均可），与官方服务端行为一致——因为部分客户端
+（含官方 GUI）会把用户配置的路径原样带到 WebSocket 升级请求里。</p>
+
+</section>
+
+<section class="doc-sec" id="5-配置参考-sec">
+<h2 id="5-配置参考" class="heading-anchor"><a class="anchor" href="#5-配置参考" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5. 配置参考</h2>
+<p>所有配置通过 <code>wrangler.toml</code> 的 <code>[vars]</code>（或 <code>wrangler secret</code>）设置，改完重新 deploy 生效。</p>
+<h3 id="51-基础配置" class="heading-anchor"><a class="anchor" href="#51-基础配置" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.1 基础配置</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SERVER_PEER_ID</code></td>
+<td><code>10000001</code></td>
+<td>服务端虚拟 Peer ID。避免与客户端随机 ID 冲突（客户端 ID 为大随机数）</td>
+</tr>
+<tr>
+<td><code>SERVER_NETWORK_NAME</code></td>
+<td><code>public_server</code></td>
+<td>握手响应中宣告的网络名。与客户端网络名不同 ⇒ 官方客户端按&quot;外部网络中继&quot;处理（行为与官方公共服务器一致）</td>
+</tr>
+<tr>
+<td><code>SERVER_HOSTNAME</code></td>
+<td><code>easytier-cf-relay</code></td>
+<td>节点主机名（路由表中显示）</td>
+</tr>
+<tr>
+<td><code>SERVER_VERSION_STR</code></td>
+<td><code>easytier-cf-relay/1.4.0</code></td>
+<td>节点版本串（<code>easytier-cli peer</code> 可见）</td>
+</tr>
+</tbody></table></div>
+<h3 id="52-p2p-与转发行为" class="heading-anchor"><a class="anchor" href="#52-p2p-与转发行为" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.2 P2P 与转发行为</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>AVOID_RELAY_DATA</code></td>
+<td><code>1</code></td>
+<td>纯 P2P 模式：在 feature_flag 中宣告 <code>avoid_relay_data</code>，OSPF 给本节点边赋大代价，客户端优先直连</td>
+</tr>
+<tr>
+<td><code>RELAY_DATA</code></td>
+<td><code>1</code></td>
+<td>P2P 失败时的兜底：<code>1</code> 转发 Data/KCP 数据包；<code>0</code> 丢弃（严格纯 P2P，只保留控制面）</td>
+</tr>
+</tbody></table></div>
+<h3 id="53-容量与超时" class="heading-anchor"><a class="anchor" href="#53-容量与超时" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.3 容量与超时</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MAX_PEERS_PER_ROOM</code></td>
+<td><code>64</code></td>
+<td>单房间最大 peer 数（含所有网络分组）</td>
+</tr>
+<tr>
+<td><code>MAX_CONNS_PER_IP</code></td>
+<td><code>6</code></td>
+<td>单 IP 并发连接上限（v1.4.1 事前限流）：同一 IP 的开放连接数达到上限后，新升级请求返回 429 + Retry-After。DO 升级层权威检查；同 NAT 多节点共享出口 IP 时按需调大；<code>0</code> = 关闭。<strong>前提</strong>：与边缘 IP 黑名单一样，依赖 Cloudflare 边缘注入的 <code>CF-Connecting-IP</code>——非 CF 前置的直连链路或本地 dev 下该头缺失时自动跳过（DO 层黑名单仍生效）</td>
+</tr>
+<tr>
+<td><code>MSG_RATE_LIMIT_PER_SEC</code></td>
+<td><code>50</code></td>
+<td>单连接消息速率上限（v1.5 事前限流）：每连接每秒最大消息数，超限先告警、持续超限断开连接（4008 rate limited）并计入总览「速率限流」计数。EasyTier 心跳 8s 1 个、路由同步爆发每秒数十个，默认 50 宽裕；<code>0</code> = 关闭</td>
+</tr>
+<tr>
+<td><code>MAX_PEERS_PER_GROUP</code></td>
+<td><code>32</code></td>
+<td>每分组节点数上限（v1.5 事前限流）：单个网络分组的在线节点数达到上限后，该网络的新节点握手被拒（4030 group full）并计入总览「分组限流」计数，其它网络不受影响；同 peerId 重连顶替不受限；<code>0</code> = 不限</td>
+</tr>
+<tr>
+<td><code>MAX_MESSAGE_BYTES</code></td>
+<td><code>131072</code></td>
+<td>单条 WS 消息上限（128 KiB，远大于 EasyTier MTU 1380 与路由同步包）</td>
+</tr>
+<tr>
+<td><code>HANDSHAKE_TIMEOUT_MS</code></td>
+<td><code>15000</code></td>
+<td>连接后未完成握手的清理超时（防幽灵连接第一道防线）</td>
+</tr>
+<tr>
+<td><code>PEER_IDLE_TIMEOUT_MS</code></td>
+<td><code>75000</code></td>
+<td>空闲超时。<strong>必须 &gt; 客户端 ping 最大间隔 32s</strong>（防幽灵节点第二道防线）</td>
+</tr>
+<tr>
+<td><code>SERVER_PING_IDLE_MS</code></td>
+<td><code>40000</code></td>
+<td>服务端主动 ping 阈值，探测半开连接（第三道防线）</td>
+</tr>
+<tr>
+<td><code>ROUTE_INFO_UNREACHABLE_MS</code></td>
+<td><code>90000</code></td>
+<td>路由条目老化（防线五）：条目未刷新且节点不可达（无连接且 PeerCenter 无可达路径）超过该时长 → 删除。对齐官方 <code>clear_expired_peer</code> 语义</td>
+</tr>
+<tr>
+<td><code>ROUTE_INFO_TTL_MS</code></td>
+<td><code>3660000</code></td>
+<td>路由条目老化（防线五）：条目未刷新超过该时长 → 无条件删除（61 分钟）</td>
+</tr>
+<tr>
+<td><code>GROUP_AUTO_DELETE_MS</code></td>
+<td><code>60000</code></td>
+<td>空分组自动删除宽限（防线六）：分组内在线节点归零后持续该时长仍为空 → 整组删除（含路由条目与摘要注册）；<code>0</code> = 关闭</td>
+</tr>
+<tr>
+<td><code>SWEEP_INTERVAL_MS</code></td>
+<td><code>15000</code></td>
+<td>alarm 清扫周期上限（老化与空分组删除也在此周期内执行）。有连接时按自适应排程取「该周期」与「最近 socket 事件时刻」的较小值</td>
+</tr>
+<tr>
+<td><code>SWEEP_IDLE_INTERVAL_MS</code></td>
+<td><code>300000</code></td>
+<td>空闲退避（v1.4.0）：房间无连接且无脏数据时 alarm 退避到该间隔（空房间消耗从 5,760 请求/天降至 288）；<code>0</code> = 关闭</td>
+</tr>
+</tbody></table></div>
+<h3 id="54-安全" class="heading-anchor"><a class="anchor" href="#54-安全" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.4 安全</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>STRICT_DIGEST</code></td>
+<td><code>1</code></td>
+<td><code>1</code>：同一网络名出现不同 network_secret 摘要 ⇒ 拒绝（防网络名抢占/嗅探）；<code>0</code>：隔离为不同分组</td>
+</tr>
+<tr>
+<td><code>TARPIT_UNKNOWN</code></td>
+<td><code>1</code></td>
+<td>未知路径 tar pit（v1.4.1）：非 WS 升级请求访问未知路径时挂起不响应——不返回 404、不泄露行为指纹，让路径扫描器空等；EasyTier 客户端只走升级、保留路径（health/favicon/metrics/admin）各有响应，均不受影响；<code>0</code> = 关闭（恢复 404）</td>
+</tr>
+<tr>
+<td><code>NETWORK_SECRETS</code></td>
+<td>（空）</td>
+<td>可选 JSON 映射 <code>{&quot;网络名&quot;:&quot;密钥&quot;}</code>。配置后服务端用 <strong>SipHash-1-3</strong>（与官方同一算法）校验客户端摘要，密钥不匹配直接拒绝</td>
+</tr>
+</tbody></table></div>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml"># 示例：校验两个网络的密钥
+[vars]
+NETWORK_SECRETS = &quot;{\&quot;myteam\&quot;:\&quot;s3cret!\&quot;,\&quot;family\&quot;:\&quot;home123\&quot;}&quot;
+</code></pre></div>
+<blockquote>
+<p>不配置 <code>NETWORK_SECRETS</code> 时，任何持有正确 <code>(网络名, 密钥)</code> 组合的客户端都可接入
+——与官方公共服务器 <code>public.easytier.cn</code> 的行为一致（不同密钥的网络天然隔离，互不可见）。</p>
+</blockquote>
+<h3 id="55-多房间分片可选" class="heading-anchor"><a class="anchor" href="#55-多房间分片可选" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.5 多房间分片（可选）</h3>
+<p>默认所有连接进同一个 DO 房间 <code>&quot;global&quot;</code>（同房间内按网络名+摘要自动分组隔离）。
+需要物理隔离（例如不同租户）时：</p>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">[vars]
+ROOM_HEADER = &quot;X-Room&quot;       # 按请求头分片
+# 或
+ROOM_QUERY = &quot;room&quot;          # 按 URL 查询参数分片，如 wss://et.example.com/?room=t1
+</code></pre></div>
+<h3 id="56-kv-审计记录-黑名单" class="heading-anchor"><a class="anchor" href="#56-kv-审计记录-黑名单" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.6 KV 审计（记录 + 黑名单）</h3>
+<p>六类信息（网络分组 / 节点在线 / 路由信息 / 全局互联 / 连接列表 / 摘要注册表）的
+连接与事件记录进 Workers KV，<strong>每类只占一条 KV 键</strong>（记录 7 条 + 黑名单 4 条，共 11 条）；
+管理端另有黑名单（分四类：节点 PeerId / 网络分组 / 摘要注册 / 客户端 IP）。
+记录查询页支持按类型筛选，类型下拉首项为**「全部」**（跨类型按时间合并视图，无需额外 KV 键）。</p>
+<p><strong>启用步骤</strong>（可选；不配置 KV 绑定时功能优雅降级——记录与黑名单仅存
+Durable Object storage，管理页功能不变）：</p>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash"># 1. 创建 KV namespace（免费计划自带）
+npx wrangler kv namespace create AUDIT_KV
+# 输出 id 后填入 wrangler.toml：
+
+[[kv_namespaces]]
+binding = &quot;AUDIT_KV&quot;
+id = &quot;&lt;上面输出的 id&gt;&quot;
+
+# 2. 重新部署
+npx wrangler deploy
+</code></pre></div>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RECORD_FLUSH_MS</code></td>
+<td><code>600000</code></td>
+<td>KV 镜像最小间隔（毫秒）。事件先写内存 + DO storage，按此间隔节流写 KV（控制免费额度写入量）</td>
+</tr>
+<tr>
+<td><code>RECORD_DEFAULT_LIMIT</code></td>
+<td><code>100</code></td>
+<td>各类记录默认条数上限（管理页「记录设置」可单独调整）</td>
+</tr>
+<tr>
+<td><code>BLACKLIST_LIMIT</code></td>
+<td><code>1000</code></td>
+<td>各类黑名单条数上限（<strong>硬设置</strong>）</td>
+</tr>
+<tr>
+<td><code>ADMIN_AUDIT</code></td>
+<td><code>1</code></td>
+<td><strong>硬设置</strong>：管理端审计开关。记录管理员登录（IP/时间）与操作；管理页不可关闭，admin 类记录不可删除（v1.3.0 起不再记录&quot;查看&quot;事件——自动刷新不刷屏、省写入）</td>
+</tr>
+<tr>
+<td><code>ADMIN_AUDIT_LIMIT</code></td>
+<td><code>200</code></td>
+<td>管理端审计记录上限（<strong>硬设置</strong>）</td>
+</tr>
+<tr>
+<td><code>IP_BLOCK_CACHE_MS</code></td>
+<td><code>30000</code></td>
+<td>边缘层 IP 黑名单缓存（v1.4.0）：isolate 内缓存 <code>bl:socket</code> 的 KV 读结果，重连风暴时 KV 读从每次连接 1 次降为每 TTL 1 次。<strong>只延后拦截、绝不漏放</strong>（缓存未命中照旧放行走 DO 权威检查）；<code>0</code> = 关闭</td>
+</tr>
+</tbody></table></div>
+<p>KV 键布局与写入策略详见技术文档 §9。免费额度核算：
+KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 144 写/天，
+实际仅在有新事件的周期产生写入（典型小网络全类合计每天数十次），远低于限额；
+读取主要为两处——冷启动且 DO storage 为空时（每键一次）与 WebSocket 升级时的
+边缘黑名单检查（只读 <code>bl:socket</code> 一条键，v1.4.0 起有 isolate 缓存：默认每 30s
+至多一次 KV 读，重连风暴时也只消耗每 TTL 一次读取）。</p>
+<p><strong>黑名单行为</strong>：管理页执行「踢出节点 / 删除分组 / 删除摘要注册 / 断开连接」时，
+操作对象（PeerId / 网络名 / IP）自动进入对应类别黑名单并被拦截后续接入；
+黑名单页可手工添加、移除（解除封锁）或清空。断开连接会拉黑该客户端 IP——
+若多个节点共用同一出口 IP，请谨慎使用（可先移除该 IP 再让其重连）。</p>
+<p>IP 黑名单为<strong>双层拦截</strong>（v1.3.0）：Worker 入口先读 KV 直接 403（不唤醒 DO，
+被拉黑客户端的重连风暴不消耗 DO 请求与时长计费），DO 层兜底。v1.4.0 起边缘
+层 KV 读取带 isolate 缓存（<code>IP_BLOCK_CACHE_MS</code>，默认 30s），<strong>只延后拦截、
+绝不漏放</strong>——缓存未命中（含 KV 读失败）照旧放行走 DO 层权威检查。因此：</p>
+<ul>
+<li>解除 IP 封锁后，KV 传播完成前（通常数秒，最长约 1 分钟）+ 缓存 TTL 内，
+边缘层可能仍拒绝该 IP；被新拉黑的 IP 在此窗口内会打到 DO 层被权威拦截；</li>
+<li>黑名单拒绝<strong>不写入记录</strong>（防重连风暴刷爆记录列表），拒绝次数见总览页
+「黑名单拦截」计数（DO 层口径；边缘层拒绝不经过 DO，不计数）。</li>
+</ul>
+<p><strong>事前限流</strong>（v1.4.1）：黑名单是事后拦截（需管理员操作或攻击已发生），
+单 IP 并发连接上限（<code>MAX_CONNS_PER_IP</code>，DO 升级层）补上事前缺口——同一 IP
+的开放连接数达到上限后直接 429，无需先进入黑名单；拦截次数见总览页
+「IP 限流」计数（<code>ipLimited</code>）。另：未知路径的非升级请求会被挂起不响应
+（tar pit，<code>TARPIT_UNKNOWN</code>），不泄露 404 与行为指纹。</p>
+<p><strong>KV 键前缀</strong>（v1.4.1 起更名为 <code>easytier-cf-relay:</code>，此前为 <code>et-relay:</code>）：
+首次启动新版本时自动把旧键数据迁移到新键（旧键保留不删，确认运行正常后可
+在 Cloudflare 控制台手动清理）；无需任何手工操作。</p>
+<blockquote>
+<p><strong>多房间分片注意</strong>：KV 审计键为全局共享（各房间 DO 刷盘同一组键，以最后
+刷盘的房间为准）。KV 审计与边缘 IP 拦截面向默认单房间部署；使用
+<code>ROOM_HEADER</code> / <code>ROOM_QUERY</code> 分片时不建议启用 <code>AUDIT_KV</code>。</p>
+</blockquote>
+<h3 id="57-日志" class="heading-anchor"><a class="anchor" href="#57-日志" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.7 日志</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>LOG_LEVEL</code></td>
+<td><code>info</code></td>
+<td><code>debug</code> / <code>info</code> / <code>warn</code> / <code>error</code>。debug 会打印每个包的类型与路由，仅排障时开启</td>
+</tr>
+</tbody></table></div>
+<h3 id="58-监控与管理端" class="heading-anchor"><a class="anchor" href="#58-监控与管理端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.8 监控与管理端</h3>
+<p><strong>生产环境默认全部禁用</strong>（不配置即 404，零攻击面）。启用时务必使用
+<strong>随机长路径 + 强 token 双重防线</strong>：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>变量</th>
+<th>默认值</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HEALTH_PATH</code></td>
+<td><code>/health</code></td>
+<td>健康检查路径（v1.4.0）。配置后仅该路径返回 <code>{&quot;ok&quot;:true}</code>，原 <code>/health</code> 不再暴露（404 或随 tar pit 挂起；无需 token）</td>
+</tr>
+<tr>
+<td><code>METRICS_PATH</code></td>
+<td>（空）</td>
+<td>统计端点自定义安全路径。不配置则 <code>/metrics</code> 完全禁用</td>
+</tr>
+<tr>
+<td><code>METRICS_TOKEN</code></td>
+<td>（空）</td>
+<td>统计端点 token（<code>Authorization: Bearer &lt;t&gt;</code> 或 <code>?token=&lt;t&gt;</code>）。<strong>与 <code>METRICS_PATH</code> 同时配置才启用（fail-closed）</strong>。⚠️ <code>?token=</code> 会进入 URL 日志/浏览器历史/Referer——生产建议只用 Bearer 头（v1.4.2 起文档标注，兼容保留）</td>
+</tr>
+<tr>
+<td><code>ADMIN_PATH</code></td>
+<td>（空）</td>
+<td>Web 管理端路径。<strong>与 <code>ADMIN_TOKEN</code> 同时配置才启用</strong>（页面壳公开、数据 API 鉴权）</td>
+</tr>
+<tr>
+<td><code>ADMIN_TOKEN</code></td>
+<td>（空）</td>
+<td>管理端 token（状态查看 / 踢出节点 / 删除分组）</td>
+</tr>
+</tbody></table></div>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">[vars]
+HEALTH_PATH = &quot;/h-a1b2c3d4&quot;                # 可选，默认 /health
+METRICS_PATH = &quot;/m-a1b2c3d4&quot;              # 用 openssl rand -hex 8 生成
+METRICS_TOKEN = &quot;长随机字符串&quot;
+ADMIN_PATH = &quot;/console-e5f6a7&quot;
+ADMIN_TOKEN = &quot;另一个长随机字符串&quot;
+</code></pre></div>
+<p>要点：</p>
+<ul>
+<li>鉴权失败统一返回 <strong>404</strong>（不暴露端点存在性）；token 比较为常数时间（防时序侧信道）；</li>
+<li>DO 内部端点（<code>/internal/*</code>）只接受 Worker 入口鉴权后的改写转发：带
+<code>Upgrade: websocket</code> 头伪造内部路径的请求在 DO 层直接 404（v1.4.1，
+防「升级头 + 内部路径」绕过 token 直达端点）；</li>
+<li>管理端页面壳本身无数据（可公开访问），所有数据 API 均需 token；</li>
+<li><strong>token 属于敏感信息</strong>：生产建议用 <code>npx wrangler secret put METRICS_TOKEN</code> 注入而非写进 toml；</li>
+<li>管理页自动刷新间隔 30s（v1.4.0 起；且页面不可见时自动暂停），长开页面的请求量
+约 2.9k/天，对免费额度（100k/天）占用很小，不需要时可关闭自动刷新。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec" id="6-客户端接入-sec">
+<h2 id="6-客户端接入" class="heading-anchor"><a class="anchor" href="#6-客户端接入" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6. 客户端接入</h2>
+<h3 id="61-linux-macoseasytier-core-cli" class="heading-anchor"><a class="anchor" href="#61-linux-macoseasytier-core-cli" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.1 Linux / macOS（easytier-core CLI）</h3>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">easytier-core \
+  --network-name myteam \
+  --network-secret s3cret! \
+  --hostname node-a \
+  -p wss://et.example.com/
+</code></pre></div>
+<p>实测输出（v2.6.4 官方客户端 + 本项目）：</p>
+<div class="code-block" data-lang=""><pre><code>INFO CORE::INSTANCE::CONNECTION: new peer connection added conn_info=PeerConnInfo { my_peer_id: ..., dst_peer_id: 10000001, ... }
+INFO CORE::INSTANCE: new peer added peer_id=10000001
+</code></pre></div>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">$ easytier-cli peer
+| ipv4          | hostname | cost  | lat(ms) | tunnel | version           |
+|---------------|----------|-------|---------|--------|-------------------|
+| 10.126.0.1/24 | nodeA    | Local | -       | -      | 2.6.4-8428a89d    |
+|               | easytier-cf-relay | p2p   | 3.88    | ws     | easytier-cf-relay/1.0.0 |
+| 10.126.0.2/24 | nodeB    | relay(2) | 18.00 |        | 2.6.4-8428a89d    |
+</code></pre></div>
+<h3 id="62-windows-gui-macos-gui-手机端" class="heading-anchor"><a class="anchor" href="#62-windows-gui-macos-gui-手机端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.2 Windows GUI / macOS GUI / 手机端</h3>
+<ul>
+<li><strong>网络名称</strong>：<code>myteam</code></li>
+<li><strong>网络密钥</strong>：<code>s3cret!</code></li>
+<li><strong>节点/Peer</strong>：<code>wss://et.example.com/</code>（新建一个节点条目填入即可）</li>
+</ul>
+<h3 id="63-docker" class="heading-anchor"><a class="anchor" href="#63-docker" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.3 Docker</h3>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">docker run --name easytier -d --network host --cap-add NET_ADMIN \
+  easytier/easytier:latest \
+  --network-name myteam --network-secret &#39;s3cret!&#39; \
+  -p wss://et.example.com/
+</code></pre></div>
+<h3 id="64-兼容性矩阵" class="heading-anchor"><a class="anchor" href="#64-兼容性矩阵" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.4 兼容性矩阵</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>客户端</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>easytier-core <strong>2.6.4</strong> Linux x86_64</td>
+<td>✅ 实测通过（握手/路由/双节点互见/数据中继/长时间稳定）</td>
+</tr>
+<tr>
+<td>easytier-core 2.x 其它版本</td>
+<td>✅ 协议层面兼容（握手 + OSPF + PeerCenter 均按官方 2.6.x 语义实现）</td>
+</tr>
+<tr>
+<td>secure mode（Noise，v2.6.0+ 可选功能）</td>
+<td>❌ 不支持，客户端需使用默认（非 secure）模式</td>
+</tr>
+</tbody></table></div>
+
+</section>
+
+<section class="doc-sec sec-extended" id="7-成本与额度-sec">
+<h2 id="7-成本与额度" class="heading-anchor"><a class="anchor" href="#7-成本与额度" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>7. 成本与额度</h2>
+<p><strong>免费计划即可运行本服务</strong>（SQLite 后端 Durable Objects 已对免费计划开放）。关键额度：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>免费计划</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>请求</td>
+<td>100,000 / 天</td>
+<td>含 WS 连接建立、<strong>入站 WS 消息（20:1 折算）</strong>、alarm 唤醒</td>
+</tr>
+<tr>
+<td>Duration</td>
+<td>13,000 GB-s / 天</td>
+<td><strong>Hibernation 状态不计费</strong> —— 本实现全用 Hibernation API，空闲时成本趋近零</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>5 GB / 账户</td>
+<td>本服务仅存路由元数据（KB 级）</td>
+</tr>
+<tr>
+<td>KV 写</td>
+<td>1,000 / 天</td>
+<td>启用 KV 审计后：事件按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）节流镜像，每键理论最大 144 写/天；拒绝/查看事件不产生写入</td>
+</tr>
+<tr>
+<td>KV 读</td>
+<td>100,000 / 天</td>
+<td>冷启动且 DO storage 为空时读取（每键一次）+ WS 升级的边缘黑名单检查（v1.4.0 起 isolate 缓存，默认每 30s 至多 1 次读）</td>
+</tr>
+<tr>
+<td>单 DO 吞吐</td>
+<td>~1,000 req/s（软限制）</td>
+<td>单房间 64 peer 远达不到</td>
+</tr>
+</tbody></table></div>
+<p>成本估算（10 个客户端、每客户端 8s 一次心跳的典型小网络）：</p>
+<ul>
+<li>计费请求 ≈ 10 × (86400/8) / 20 ≈ <strong>5,400 请求/天</strong>（v1.4.0 起 alarm 自适应
+排程 + 空闲退避：有连接时 alarm 对齐最近事件时刻、至多 15s 一次；空房间退避
+到 5 分钟一次 = <strong>288 请求/天</strong>，较固定 15s 的 5,760 请求/天大幅下降）；</li>
+<li>duration：连接空闲即休眠，<strong>活跃处理时间每天累计不足 1 GB-s</strong>；</li>
+<li>KV 审计：每天几十次连接波动 × 涉及的 2~3 个键 ÷ 10 分钟节流合并 ≈ <strong>数十写/天</strong>，
+远低于 1000/天限额（记录上限 100 条/类，存储占用 KB 级）；</li>
+<li>KV 读 ≈ 冷启动恢复 + 边缘黑名单检查（缓存后每 30s 至多 1 次）≈ <strong>数千读/天</strong>，
+远低于 10 万限额；</li>
+<li><strong>被拉黑客户端的重连风暴</strong>：每次重连仍占 1 次 Worker 请求（客户端行为），
+但 v1.3.0 起在 Worker 入口边缘层直接 403，<strong>不唤醒 DO、不产生审计写入</strong>，
+DO 请求与 KV 写入均零消耗；v1.4.0 起边缘层 KV 读有 30s 缓存，
+风暴期间 KV 读也不再与重连次数成正比；</li>
+<li>结论：<strong>免费额度内稳定运行</strong>。超出时可升级 Workers Paid（$5/月起，含 100 万请求/月 + 40 万 GB-s/月）。</li>
+</ul>
+<p>计费细节参见 Cloudflare 官方文档：</p>
+<ul>
+<li><a href="https://developers.cloudflare.com/durable-objects/platform/pricing/" target="_blank" rel="noopener noreferrer">Durable Objects 定价</a></li>
+<li><a href="https://developers.cloudflare.com/durable-objects/platform/limits/" target="_blank" rel="noopener noreferrer">Durable Objects 限制</a></li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="8-运维日志监控升级-sec">
+<h2 id="8-运维日志监控升级" class="heading-anchor"><a class="anchor" href="#8-运维日志监控升级" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8. 运维：日志、监控、升级</h2>
+<h3 id="81-健康检查与指标" class="heading-anchor"><a class="anchor" href="#81-健康检查与指标" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.1 健康检查与指标</h3>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash"># 健康检查：零指纹（P0 整改后仅返回 {&quot;ok&quot;:true}）
+curl https://et.example.com/health
+# {&quot;ok&quot;:true}
+# 配置 HEALTH_PATH 后：curl https://et.example.com&lt;HEALTH_PATH&gt;（原 /health 不再暴露：404 或 tar pit 挂起）
+
+# 统计：自定义安全路径 + token（未配置 METRICS_PATH/METRICS_TOKEN 时 404）
+curl -H &quot;Authorization: Bearer &lt;METRICS_TOKEN&gt;&quot; https://et.example.com&lt;m-metrics-path&gt;
+# {
+#   &quot;ok&quot;: true, &quot;totalPeers&quot;: 2, &quot;groupCount&quot;: 1,
+#   &quot;groups&quot;: { &quot;myteam:&lt;digest&gt;&quot;: { &quot;peers&quot;: [...], &quot;knownInfos&quot;: 3 } },
+#   &quot;counters&quot;: { &quot;msgsIn&quot;: 103, &quot;msgsOut&quot;: 103, &quot;forwards&quot;: 58, &quot;errors&quot;: 0, ... }
+# }
+</code></pre></div>
+<p>字段速查：<code>forwards</code> = 数据包中继次数；<code>errors</code> = 协议错误数（应恒为 0）；
+<code>forgeries</code> = 源伪造拦截数；<code>groups</code> 按网络名分组列出在线 peer ID。</p>
+<h3 id="82-web-管理端" class="heading-anchor"><a class="anchor" href="#82-web-管理端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.2 Web 管理端</h3>
+<p>配置 <code>ADMIN_PATH</code> + <code>ADMIN_TOKEN</code> 后，浏览器打开 <code>https://et.example.com&lt;ADMIN_PATH&gt;</code>
+进入控制台（输入 token 即可，浏览器本地保存）。</p>
+<p><strong>界面结构</strong>（侧边栏列表式导航，按功能块分区）：</p>
+<ul>
+<li><strong>总览</strong>（对照 <code>easytier-cli stats</code> / <code>node</code>）：运行时长（自房间创建起累计，含休眠）、分组数、
+在线节点、收发包/字节/转发/错误计数，以及审计概览（记录/黑名单各分类计数与 KV 状态）；</li>
+<li><strong>节点在线</strong>（对照 <code>easytier-cli peer</code>）：各分组在线节点、连接时间、最近活动，可<strong>踢出节点</strong>；</li>
+<li><strong>路由信息</strong>（对照 <code>easytier-cli route</code>）：RoutePeerInfo 路由表，含 direct/transit 来源标记
+与幽灵条目标记（transit 来源 + 无连接），可<strong>删除条目</strong>；</li>
+<li><strong>全局互联</strong>（对照 <code>easytier-cli peer-center</code>）：PeerCenter 互联表，可<strong>删除条目</strong>；</li>
+<li><strong>连接列表</strong>：全部 socket（含未握手），含 socket ID 与客户端 IP，可<strong>断开连接</strong>；</li>
+<li><strong>网络分组</strong>（对照 <code>easytier-cli foreign-network</code>）：按网络名+摘要隔离的分组，可<strong>删除分组</strong>；</li>
+<li><strong>摘要注册表</strong>：网络名 → 摘要注册（STRICT_DIGEST 判定依据），可<strong>删除注册</strong>；</li>
+<li><strong>记录查询</strong>：七类记录（六类数据 + 管理端审计）分页浏览；类型下拉首项为
+<strong>「全部」</strong>（跨类型按时间合并，附类型列），单条/批量删除与清空
+（admin 类为硬审计，只读不可删——&quot;全部&quot;视图中 admin 行的勾选与删除均禁用）；</li>
+<li><strong>记录设置</strong>：六类数据记录各自的开/关与条数上限（管理端审计与黑名单上限为硬设置，只读展示）；</li>
+<li><strong>黑名单</strong>：四类黑名单（节点 PeerId / 网络分组 / 摘要注册 / 客户端 IP）分页浏览，
+手工添加、单个/批量移除（解除封锁）与清空。</li>
+</ul>
+<p>所有列表的**「操作」列按钮针对单行直接生效**（无需先勾选复选框；勾选用于顶部
+批量按钮的批量操作）。总览页统计含「黑名单拦截」计数（DO 层拒绝次数，
+用于观测被拉黑客户端的重连行为——拒绝事件本身不再写入记录）。</p>
+<p><strong>性能设计</strong>（节点多时页面不爆炸）：</p>
+<ul>
+<li><strong>服务端分页</strong>：所有列表 <code>?tab=&amp;offset=&amp;limit=</code> 分页拉取，每页默认 50 条（可选 20/50/100/200，上限 200）；</li>
+<li><strong>独立滚动</strong>：列表区固定最大高度、内部滚动，表头 sticky；</li>
+<li><strong>按块统计</strong>：每个功能块头部显示自身统计（总数/直连/中转/幽灵/空分组等），
+侧边栏实时显示各块计数；</li>
+<li><strong>批量操作</strong>：每个功能块支持勾选（单选/全选本页）+ 批量按钮
+（删除分组 / 踢出节点 / 删除路由 / 删除互联 / 断开连接 / 删除摘要注册）；</li>
+<li><strong>自动刷新仅拉取当前 tab</strong>（30s，可关闭；页面不可见时自动暂停），开销可控。</li>
+</ul>
+<p><strong>删除分组</strong>：断开组内全部连接、清除路由/会话数据、解除摘要注册
+（被恶意摘要抢占时可用此操作解锁）。注意：删除分组 / 踢出节点 / 删除摘要注册 /
+断开连接会把操作对象（网络名 / PeerId / IP）自动加入对应类别的<strong>黑名单</strong>并拦截
+后续接入，需要放行时到「黑名单」页移除即可（见 5.6 节）。</p>
+<p>官方 CLI 中依赖 UDP/TUN/系统服务的命令（<code>connector</code>、<code>vpn-portal</code>、<code>stun</code>、<code>acl</code> 等）
+在 Workers 运行时不可用，控制台底部有完整对照表。</p>
+<p>也可直接调 API（鉴权方式同上）：</p>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash"># 查看状态（tab: overview/groups/peers/routes/peercenter/sockets/digests；分页 offset/limit）
+curl -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  &quot;https://et.example.com&lt;ADMIN_PATH&gt;/api/state?tab=routes&amp;offset=0&amp;limit=50&quot;
+
+# 踢出节点（单个或批量）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;peers&quot;:[{&quot;groupKey&quot;:&quot;myteam:&lt;digest&gt;&quot;,&quot;peerId&quot;:12345678}]}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/peer/kick
+
+# 删除分组（支持 groupKeys 数组 / networkName / all）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;networkName&quot;:&quot;myteam&quot;}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/group/delete
+
+# 删除路由条目（批量；在线节点的 direct 条目会被跳过）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;groupKey&quot;:&quot;myteam:&lt;digest&gt;&quot;,&quot;peerIds&quot;:[12345678,12345679]}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/route/delete
+
+# 删除互联表条目（批量）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;groupKey&quot;:&quot;myteam:&lt;digest&gt;&quot;,&quot;peerIds&quot;:[12345678]}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/peercenter/delete
+
+# 断开指定连接（批量，按 socketId）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;socketIds&quot;:[3,5]}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/socket/close
+
+# 删除摘要注册（批量；连带清除使用该摘要的分组并断开其连接）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;networkNames&quot;:[&quot;myteam&quot;]}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/digest/delete
+
+# ---- KV 审计（记录 + 黑名单）----
+
+# 查询记录（type: groups/peers/routes/peercenter/sockets/digests/admin；分页）
+curl -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  &quot;https://et.example.com&lt;ADMIN_PATH&gt;/api/records?type=peers&amp;offset=0&amp;limit=50&quot;
+
+# 删除记录（ids 为记录 id 数组或 &quot;all&quot;；admin 类返回错误——硬审计不可删）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;type&quot;:&quot;peers&quot;,&quot;ids&quot;:&quot;all&quot;}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/records/delete
+
+# 读取 / 修改记录配置（每类开关 + 上限；admin 类不在可改范围）
+curl -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  &quot;https://et.example.com&lt;ADMIN_PATH&gt;/api/record/config&quot;
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;types&quot;:{&quot;peers&quot;:{&quot;on&quot;:true,&quot;limit&quot;:200}}}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/record/config
+
+# 查询黑名单（cat: peer/group/digest/socket）
+curl -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  &quot;https://et.example.com&lt;ADMIN_PATH&gt;/api/blacklist?cat=peer&amp;offset=0&amp;limit=50&quot;
+
+# 手工拉黑（cat + value；peer 为数字 PeerId，group/digest 为网络名，socket 为 IP）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;cat&quot;:&quot;peer&quot;,&quot;value&quot;:12345678,&quot;reason&quot;:&quot;abuse&quot;}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/blacklist/add
+
+# 移除黑名单（解除封锁；ids 为条目 id 数组或 &quot;all&quot;）
+curl -X POST -H &quot;Authorization: Bearer &lt;ADMIN_TOKEN&gt;&quot; \
+  -H &quot;content-type: application/json&quot; \
+  -d &#39;{&quot;cat&quot;:&quot;peer&quot;,&quot;ids&quot;:&quot;all&quot;}&#39; \
+  https://et.example.com&lt;ADMIN_PATH&gt;/api/blacklist/delete
+</code></pre></div>
+<h3 id="83-实时日志" class="heading-anchor"><a class="anchor" href="#83-实时日志" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.3 实时日志</h3>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">npx wrangler tail --format pretty
+</code></pre></div>
+<p><code>LOG_LEVEL=debug</code> 时可看到每个包 <code>msg type=N from=X to=Y</code> 与 RPC 分发详情。</p>
+<h3 id="84-升级" class="heading-anchor"><a class="anchor" href="#84-升级" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.4 升级</h3>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">git pull            # 或修改代码
+npx wrangler deploy
+</code></pre></div>
+<p>部署即热更新。已连接的 WebSocket 会经历一次重连（客户端自动重试，秒级恢复）。
+房间路由状态持久化在 DO storage，升级不丢。</p>
+<h3 id="85-durable-object-迁移注意" class="heading-anchor"><a class="anchor" href="#85-durable-object-迁移注意" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.5 Durable Object 迁移注意</h3>
+<p>本工程 <code>wrangler.toml</code> 使用：</p>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">[[migrations]]
+tag = &quot;v1&quot;
+new_sqlite_classes = [&quot;RelayRoom&quot;]
+</code></pre></div>
+<ul>
+<li><strong>全新部署</strong>：保持原样即可。</li>
+<li><strong>接手已有 <code>new_classes</code>（KV 后端）的旧部署</strong>：不要删掉旧 migration 条目，改为追加：</li>
+</ul>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">[[migrations]]
+tag = &quot;v1&quot;
+new_classes = [&quot;RelayRoom&quot;]     # 旧条目原样保留
+
+[[migrations]]
+tag = &quot;v2&quot;
+new_sqlite_classes = [&quot;RelayRoom&quot;]  # 追加：切换到 SQLite 后端
+</code></pre></div>
+<h3 id="86-重新生成-protobuf-静态代码仅开发" class="heading-anchor"><a class="anchor" href="#86-重新生成-protobuf-静态代码仅开发" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.6 重新生成 Protobuf 静态代码（仅开发）</h3>
+<p>跟随官方 .proto 变更时使用（普通用户不需要）：</p>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">bash tools/regen_proto.sh   # 需要本地有官方源码 checkout
+</code></pre></div>
+
+</section>
+
+<section class="doc-sec" id="9-故障排查-faq-sec">
+<h2 id="9-故障排查-faq" class="heading-anchor"><a class="anchor" href="#9-故障排查-faq" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>9. 故障排查 FAQ</h2>
+<p><strong>Q1：客户端一直 <code>connect timeout after 20s</code>？</strong></p>
+<ol>
+<li><code>curl https://你的域名/health</code> 确认 Worker 存活；</li>
+<li>检查 URL scheme 是 <code>wss://</code>（而非 <code>ws://</code>，Workers 强制 TLS）；</li>
+<li><code>npx wrangler tail</code> 看握手是否到达。到达但被拒（digest mismatch）说明密钥不对。</li>
+</ol>
+<p><strong>Q2：客户端握手成功但 <code>easytier-cli peer</code> 看不到服务端节点？</strong>
+通常是旧版本第三方实现的问题；本项目已实测 2.6.4 正常显示（hostname=easytier-cf-relay）。
+若遇到，开启 <code>LOG_LEVEL=debug</code> 检查 <code>rpc req ... service=OspfRouteRpc</code> 日志行，
+存在但无响应时请提 issue 附日志。</p>
+<p><strong>Q3：节点显示在线，但互相 ping 不通？</strong></p>
+<ul>
+<li>确认两端 <code>--network-name</code> 与 <code>--network-secret</code> 完全一致（STRICT_DIGEST=1 时不同摘要会被拒绝，日志有 <code>digest mismatch</code>）；</li>
+<li><code>RELAY_DATA=0</code> 时中继不转发数据面，必须依赖 P2P 直连（打洞失败的组合无法通信），需要兜底请设 <code>RELAY_DATA=1</code>。</li>
+</ul>
+<p><strong>Q4：本地 <code>wrangler dev</code> 报 <code>Address already in use</code>？</strong>
+端口被占用：<code>npx wrangler dev --port 8788</code> 换端口，或杀掉旧进程。</p>
+<p><strong>Q5：<code>wrangler deploy</code> 报 DO 类已存在 / migration 冲突？</strong>
+见 8.4 迁移章节。切勿删除 <code>wrangler.toml</code> 中已有的 <code>[[migrations]]</code> 条目。</p>
+<p><strong>Q6：两个客户端都能连上，但互相看不到对方（只看得到 easytier-cf-relay）？</strong>
+检查是否误配置了 <code>ROOM_HEADER</code>/<code>ROOM_QUERY</code>——两个客户端进了不同 DO 房间。
+同房间要求相同的 URL/Header。</p>
+<p><strong>Q7：想统计流量？</strong>
+配置 <code>METRICS_PATH</code> + <code>METRICS_TOKEN</code> 后访问统计端点，
+<code>counters.bytesIn/bytesOut/forwards</code> 即为控制面+数据面的转发统计；或用 Web 管理端总览页。</p>
+<p><strong>Q8：同名网络被恶意抢占（digest mismatch）怎么办？</strong>
+已配置 <code>NETWORK_SECRETS</code> 的网络不受影响（服务端以正确密钥摘要为准，注册表自愈）。
+未配置的网络被抢占时，用管理端<strong>删除该分组</strong>即可解除注册，随后正常客户端可重新接入。</p>
+<p><strong>Q10：踢出/删除的节点或网络重连不上？</strong>
+这是黑名单在生效：踢出节点 / 删除分组 / 删除摘要注册 / 断开连接会把操作对象
+（PeerId / 网络名 / IP）加入对应类别黑名单并拦截后续接入。
+到管理端「黑名单」页移除对应条目（解除封锁）即可重新接入。
+注意两点：</p>
+<ul>
+<li>断开连接拉黑的是客户端 IP——若多个节点共用同一出口 IP，会一并被拦，
+需要时先移除该 IP 条目；</li>
+<li>配置了 <code>AUDIT_KV</code> 时，IP 拦截发生在 Worker 入口边缘层（KV 直读）。
+解除封锁后 KV 传播完成前（通常数秒，最长约 1 分钟）边缘层可能仍拒绝该 IP，
+稍候即可。</li>
+</ul>
+<p><strong>Q10：管理端记录为什么删不掉 / 关不掉？&quot;查看&quot;事件为什么不见了？</strong>
+管理端审计（登录 IP/时间、操作）是<strong>硬设置</strong>（wrangler.toml <code>ADMIN_AUDIT</code>），
+管理页不可关闭、admin 类记录不可删除（防审计自擦除）。
+六类数据记录则可在「记录设置」页单独开关并设置上限。
+v1.3.0 起管理端&quot;查看&quot;事件不再记录（管理页自动刷新会持续刷屏且徒增写入）；
+黑名单拒绝事件同样不再写入「节点在线」记录（被拉黑客户端会不断重连，逐条记录
+会刷爆列表），拒绝次数改看总览页「黑名单拦截」计数。</p>
+<p><strong>Q11：被拉黑的客户端一直重连，会不会刷爆免费额度？</strong>
+每次重连尝试本身占用 1 次 Worker 请求（客户端行为，服务端无法避免），但
+v1.3.0 起：拒绝发生在 Worker 入口边缘层（读 KV 的 <code>bl:socket</code> 一条键），
+<strong>不再唤醒 Durable Object</strong>——不消耗 DO 请求与时长计费，也不产生任何审计写入
+（否则重连风暴每秒都会产生记录与 KV 镜像写入）。v1.4.0 起该 KV 读带
+isolate 缓存（<code>IP_BLOCK_CACHE_MS</code>，默认 30s）：重连风暴时 KV 读从每次连接
+1 次降为每 30s 至多 1 次，只延后拦截、绝不漏放（DO 层权威兜底）。
+若确有恶意 IP 长期轰炸，可在 Cloudflare 控制台配置 WAF/IP Access Rules 在更外层拦截。</p>
+<p><em>本手册对应实现版本：easytier-cf-relay/1.4.0（协议对齐 easytier-core 2.6.x）。技术实现细节见《<a href="technical.html">技术文档</a>》。</em></p>
+
+</section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="" width="24" height="24">
+          <span>easytier-cf-relay</span>
+        </div>
+        <p class="mb-0">在 Cloudflare Workers 免费额度内运行 EasyTier 自建 WebSocket 节点——无需 VPS，纯 P2P 优先（中继仅兜底），全 Hibernation API 空闲成本趋零。</p>
+      </div>
+      <div>
+        <h4>站点导航</h4>
+        <ul>
+          <li><a href="index.html">主页</a></li>
+          <li><a href="generator.html">wrangler.toml 生成器</a></li>
+          <li><a href="deploy.html">部署手册</a></li>
+          <li><a href="technical.html">技术文档</a></li>
+          <li><a href="changelog.html">更新日志</a></li>
+          <li><a href="网页说明文档.md">网页说明文档</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>相关链接</h4>
+        <ul>
+          <li><a href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">GitHub 仓库</a></li>
+          <li><a href="https://github.com/EasyTier/EasyTier" target="_blank" rel="noopener noreferrer">EasyTier 官方</a></li>
+          <li><a href="https://github.com/orgs/EasyTier/discussions/2512" target="_blank" rel="noopener noreferrer">另一种选择：CF Tunnel 教程</a></li>
+          <li><a href="https://ouret.ccwu.cc/" target="_blank" rel="noopener noreferrer">作者演示节点</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
+      <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

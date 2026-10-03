@@ -1,0 +1,645 @@
+/* ==========================================================================
+   components.css — 通用组件：徽章 / 按钮 / 卡片 / 代码块 / Alert / 选项卡 …
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   徽章
+   -------------------------------------------------------------------------- */
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--fg-default);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.badge .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+}
+
+.badge.badge-blue {
+  color: var(--accent-fg);
+  border-color: var(--accent-muted);
+  background: var(--accent-subtle);
+}
+
+.badge.badge-blue .dot {
+  background: var(--accent-fg);
+}
+
+.badge.badge-green {
+  color: var(--success-fg);
+  border-color: rgba(74, 194, 107, 0.4);
+  background: var(--success-subtle);
+}
+
+.badge.badge-green .dot {
+  background: var(--success-fg);
+}
+
+.badge.badge-purple {
+  color: var(--done-fg);
+  border-color: rgba(163, 113, 247, 0.4);
+  background: var(--done-subtle);
+}
+
+.badge.badge-purple .dot {
+  background: var(--done-fg);
+}
+
+.badge.badge-yellow {
+  color: var(--attention-fg);
+  border-color: rgba(212, 167, 44, 0.4);
+  background: var(--attention-subtle);
+}
+
+.badge.badge-yellow .dot {
+  background: var(--attention-fg);
+}
+
+.badge.badge-red {
+  color: var(--danger-fg);
+  border-color: rgba(248, 81, 73, 0.4);
+  background: var(--danger-subtle);
+}
+
+.badge.badge-red .dot {
+  background: var(--danger-fg);
+}
+
+.badge svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+
+/* --------------------------------------------------------------------------
+   按钮
+   -------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--fg-default);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  background: var(--bg-muted);
+  text-decoration: none;
+}
+
+.btn:active {
+  opacity: 0.85;
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.btn.btn-primary {
+  color: var(--fg-on-emphasis);
+  background: var(--success-emphasis);
+  border-color: rgba(31, 35, 40, 0.15);
+}
+
+.btn.btn-primary:hover {
+  background: var(--success-fg);
+}
+
+html[data-theme="dark"] .btn.btn-primary:hover {
+  background: #2ea043;
+}
+
+.btn.btn-accent {
+  color: var(--fg-on-emphasis);
+  background: var(--accent-emphasis);
+  border-color: rgba(31, 35, 40, 0.15);
+}
+
+.btn.btn-accent:hover {
+  background: var(--accent-fg);
+}
+
+.btn.btn-lg {
+  padding: 9px 20px;
+  font-size: 16px;
+}
+
+.btn.btn-sm {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+
+.btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   卡片
+   -------------------------------------------------------------------------- */
+
+.card {
+  padding: 16px;
+  background: var(--bg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.card:hover {
+  border-color: var(--accent-muted);
+  box-shadow: var(--shadow-medium);
+}
+
+.card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-link:hover {
+  text-decoration: none;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--fg-muted);
+}
+
+/* 特性卡片（九宫格） */
+.feature-card {
+  position: relative;
+  padding: 20px;
+}
+
+.feature-card .feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+  color: var(--accent-fg);
+  background: var(--accent-subtle);
+  border: 1px solid var(--accent-muted);
+  border-radius: 10px;
+}
+
+.feature-card .feature-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.feature-card h3 {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+.feature-card .feature-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-fg);
+}
+
+/* --------------------------------------------------------------------------
+   代码块（带语言标签 + 复制按钮）
+   -------------------------------------------------------------------------- */
+
+.code-block {
+  position: relative;
+  margin: 0 0 16px;
+  background: var(--code-block-bg);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.code-block .code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 6px 14px;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-subtle);
+}
+
+html[data-theme="dark"] .code-block .code-head {
+  background: rgba(110, 118, 129, 0.1);
+}
+
+.code-block .code-lang {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--fg-muted);
+  text-transform: lowercase;
+}
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.copy-btn:hover {
+  color: var(--fg-default);
+  border-color: var(--fg-muted);
+}
+
+.copy-btn.copied {
+  color: var(--success-fg);
+  border-color: var(--success-fg);
+}
+
+.copy-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.code-block pre {
+  max-height: 560px;
+}
+
+/* 代码块内的简单 TOML/JSON 着色（生成器预览与文档代码通用） */
+.tok-c {
+  color: var(--fg-muted);
+  font-style: italic;
+}
+
+.tok-k {
+  color: var(--danger-fg);
+}
+
+.tok-s {
+  color: var(--accent-fg);
+}
+
+.tok-n {
+  color: var(--done-fg);
+}
+
+.tok-b {
+  color: var(--attention-fg);
+}
+
+.tok-h {
+  color: var(--success-fg);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   GitHub 风格 Alert
+   -------------------------------------------------------------------------- */
+
+.alert {
+  margin: 0 0 16px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 1px solid;
+  border-left-width: 4px;
+  border-radius: var(--radius);
+}
+
+.alert .alert-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.alert .alert-title svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.alert p {
+  margin: 0 0 8px;
+}
+
+.alert > :last-child {
+  margin-bottom: 0;
+}
+
+.alert-note {
+  border-color: var(--border-default) var(--border-default) var(--border-default) var(--accent-emphasis);
+  background: transparent;
+}
+
+.alert-note .alert-title {
+  color: var(--accent-fg);
+}
+
+.alert-tip {
+  border-color: var(--border-default) var(--border-default) var(--border-default) var(--success-emphasis);
+}
+
+.alert-tip .alert-title {
+  color: var(--success-fg);
+}
+
+.alert-important {
+  border-color: var(--border-default) var(--border-default) var(--border-default) var(--done-fg);
+}
+
+.alert-important .alert-title {
+  color: var(--done-fg);
+}
+
+.alert-warning {
+  border-color: var(--border-default) var(--border-default) var(--border-default) #d4a72c;
+}
+
+.alert-warning .alert-title {
+  color: var(--attention-fg);
+}
+
+.alert-caution {
+  border-color: var(--border-default) var(--border-default) var(--border-default) var(--danger-emphasis);
+}
+
+.alert-caution .alert-title {
+  color: var(--danger-fg);
+}
+
+/* --------------------------------------------------------------------------
+   分段开关（文档「完整 / 精炼」切换）
+   -------------------------------------------------------------------------- */
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+}
+
+.segmented button {
+  padding: 4px 14px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.segmented button:hover {
+  color: var(--fg-default);
+}
+
+.segmented button.active {
+  color: var(--fg-default);
+  background: var(--bg-default);
+  box-shadow: var(--shadow-small);
+  border: 1px solid var(--border-default);
+  padding: 3px 13px;
+}
+
+/* --------------------------------------------------------------------------
+   标签页（客户端接入方式等）
+   -------------------------------------------------------------------------- */
+
+.tabs {
+  margin: 0 0 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.tabs .tab-nav {
+  display: flex;
+  gap: 0;
+  padding: 0 8px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border-default);
+  overflow-x: auto;
+}
+
+.tabs .tab-nav button {
+  position: relative;
+  padding: 10px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tabs .tab-nav button:hover {
+  color: var(--fg-default);
+}
+
+.tabs .tab-nav button.active {
+  color: var(--fg-default);
+}
+
+.tabs .tab-nav button.active::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent-emphasis);
+  border-radius: 2px;
+}
+
+.tabs .tab-panel {
+  display: none;
+  padding: 16px;
+}
+
+.tabs .tab-panel.active {
+  display: block;
+}
+
+/* --------------------------------------------------------------------------
+   统计数字卡
+   -------------------------------------------------------------------------- */
+
+.stat {
+  padding: 16px;
+  text-align: center;
+  background: var(--bg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.stat .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--accent-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat .stat-label {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--fg-muted);
+}
+
+.stat.stat-green .stat-value {
+  color: var(--success-fg);
+}
+
+.stat.stat-purple .stat-value {
+  color: var(--done-fg);
+}
+
+.stat.stat-yellow .stat-value {
+  color: var(--attention-fg);
+}
+
+/* --------------------------------------------------------------------------
+   标签 pill / 分隔条 / 图片框 / 工具类
+   -------------------------------------------------------------------------- */
+
+.pill {
+  display: inline-block;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-fg);
+  background: var(--accent-subtle);
+  border-radius: 999px;
+}
+
+.image-frame {
+  margin: 0 0 16px;
+  padding: 8px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.image-frame img {
+  display: block;
+  width: 100%;
+  border-radius: var(--radius);
+}
+
+.image-frame figcaption {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.divider {
+  height: 1px;
+  margin: 32px 0;
+  background: var(--border-default);
+  border: 0;
+}
+
+.muted {
+  color: var(--fg-muted);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.mb-0 {
+  margin-bottom: 0;
+}
+
+.mb-8 {
+  margin-bottom: 8px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.mb-32 {
+  margin-bottom: 32px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* 文档「精炼视图」：隐藏进阶章节与其目录项 */
+body.view-refined .sec-extended,
+body.view-refined .toc-extended {
+  display: none;
+}

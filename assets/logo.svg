@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="icon-title">
+<title id="icon-title">EasyTier CF Relay</title>
+<defs>
+<path id="cf-cloud" d="M219,247
+A38,38 0 1 1 219.5,171
+A46,46 0 0 1 297.4,178.9
+A34,34 0 0 1 297,247 Z"/>
+<mask id="cloud-tone" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+<rect width="512" height="512" fill="#fff"/>
+<polygon points="270,251 296,147 304,147 278,251" fill="#000"/>
+</mask>
+<clipPath id="cloud-light-region" clipPathUnits="userSpaceOnUse">
+<polygon points="270,251 296,147 340,147 340,251"/>
+</clipPath>
+<mask id="cloud-halo" maskUnits="userSpaceOnUse" x="0" y="0" width="512" height="512">
+<rect width="512" height="512" fill="#fff"/>
+<use href="#cf-cloud" fill="#000" stroke="#000" stroke-width="12" stroke-linejoin="round"/>
+</mask>
+<g id="et-user">
+<path d="M-38,0 A38,38 0 0 1 38,0 Z"
+fill="none" stroke="#6699FF" stroke-width="13" stroke-linejoin="round"/>
+<circle cx="0" cy="-46" r="20" fill="#9BC9FF" stroke="#6699FF" stroke-width="12"/>
+</g>
+<g id="server-unit">
+<rect x="-66" y="-45" width="132" height="90" rx="14"
+fill="#9BC9FF" stroke="#6699FF" stroke-width="12"/>
+<line x1="-54" y1="-16" x2="54" y2="-16" stroke="#6699FF" stroke-width="7" stroke-linecap="round"/>
+<rect x="-46" y="-36" width="52" height="16" rx="8"
+fill="none" stroke="#6699FF" stroke-width="7"/>
+<circle cx="30" cy="-28" r="5.5" fill="#6699FF"/>
+<circle cx="47" cy="-28" r="5.5" fill="#6699FF"/>
+<rect x="-46" y="-12" width="52" height="16" rx="8"
+fill="none" stroke="#6699FF" stroke-width="7"/>
+<circle cx="30" cy="-4" r="5.5" fill="#6699FF"/>
+<circle cx="47" cy="-4" r="5.5" fill="#6699FF"/>
+</g>
+</defs>
+<g id="ring">
+<circle cx="256" cy="256" r="224" fill="none" stroke="#6699FF" stroke-width="18"/>
+</g>
+<g id="links" fill="none" stroke="#6699FF" stroke-width="9" stroke-linecap="round"
+stroke-dasharray="18 14" stroke-opacity=".55">
+<path d="M140,339 L256,137 L372,339 Z"/>
+</g>
+<g id="nodes">
+<g id="server" mask="url(#cloud-halo)">
+<g transform="translate(256,137)">
+<use href="#server-unit"/>
+</g>
+</g>
+<g id="user-left">
+<use href="#et-user" x="140" y="385"/>
+</g>
+<g id="user-right">
+<use href="#et-user" x="372" y="385"/>
+</g>
+</g>
+<g id="cloud">
+<g mask="url(#cloud-tone)">
+<use href="#cf-cloud" fill="#F58220"/>
+<use href="#cf-cloud" fill="#FBAE40" clip-path="url(#cloud-light-region)"/>
+</g>
+</g>
+</svg>

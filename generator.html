@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>wrangler.toml 配置生成器 — easytier-cf-relay</title>
+<meta name="description" content="EasyTier Cloudflare Relay 的 wrangler.toml 在线配置生成器：按分类调整全部配置项（默认值与官方 wrangler.toml 一致），实时预览、校验并导出可直接部署的配置文件。">
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/generator.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="EasyTier CF Relay 图标" width="30" height="30">
+      <span>easytier-cf-relay</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+      <a href="index.html">主页</a>
+      <a href="generator.html" class="active" aria-current="page">配置生成器</a>
+      <a href="deploy.html">部署手册</a>
+      <a href="technical.html">技术文档</a>
+      <a href="changelog.html">更新日志</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+        <svg class="icon-sun" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13ZM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8Z"/><path d="M2.343 2.343a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.06ZM2.343 13.657a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 1 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12.63 2.75A7 7 0 1 0 12.63 13.25 5.5 5.5 0 1 1 12.63 2.75Z"/></svg>
+      </button>
+      <a class="btn btn-sm github-btn" href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+        <span class="github-label">GitHub</span>
+      </a>
+      <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-label="展开导航" aria-expanded="false">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="generator-hero">
+    <h1>wrangler.toml 配置生成器</h1>
+    <p>
+      按分类调整全部配置项（默认值与项目真实 <code>wrangler.toml</code> 逐项一致），右侧实时预览生成结果。
+      可一键复制或下载 <code>wrangler.toml</code>，直接放进项目根目录执行 <code>npx wrangler deploy</code> 即可部署。
+      修改会自动保存在浏览器本地，「恢复默认」可随时清空。
+    </p>
+    <div class="alert alert-note">
+      <p class="alert-title">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"/></svg>
+        <span>注意</span>
+      </p>
+      <p class="mb-0">
+        <strong>敏感 token 不建议写进 wrangler.toml</strong>：生产环境请用
+        <code>npx wrangler secret put METRICS_TOKEN</code> / <code>npx wrangler secret put ADMIN_TOKEN</code> 注入
+        （资源名相同则 secret 优先）。生成器里填写的 token 仅在生成配置时使用，不会上传到任何服务器。
+      </p>
+    </div>
+  </section>
+
+  <div class="generator-presets" role="group" aria-label="配置预设">
+    <span class="presets-label">快速预设</span>
+    <button class="btn btn-sm" type="button" data-preset="default">默认配置</button>
+    <button class="btn btn-sm" type="button" data-preset="strictP2P">严格纯 P2P（关闭数据面兜底）</button>
+    <button class="btn btn-sm" type="button" data-preset="opsFull">完整运维（随机路径 + 强 token + KV 审计）</button>
+  </div>
+
+  <div class="generator-grid">
+
+    <div id="gen-form" class="generator-form" aria-label="配置表单">
+      <!-- 由 js/generator.js 动态渲染 -->
+    </div>
+
+    <aside class="gen-preview" aria-label="生成结果预览">
+      <div class="preview-head">
+        <span class="preview-title">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"/></svg>
+          wrangler.toml
+        </span>
+        <div class="preview-actions">
+          <button class="btn btn-sm" type="button" id="gen-copy">复制</button>
+          <button class="btn btn-sm btn-primary" type="button" id="gen-download">下载 wrangler.toml</button>
+          <button class="btn btn-sm" type="button" id="gen-reset">恢复默认</button>
+        </div>
+      </div>
+      <pre id="gen-preview"><code></code></pre>
+      <div class="gen-extra-msgs hidden" id="gen-extra-msgs"></div>
+    </aside>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="" width="24" height="24">
+          <span>easytier-cf-relay</span>
+        </div>
+        <p class="mb-0">在 Cloudflare Workers 免费额度内运行 EasyTier 自建 WebSocket 节点——无需 VPS，纯 P2P 优先（中继仅兜底），全 Hibernation API 空闲成本趋零。</p>
+      </div>
+      <div>
+        <h4>站点导航</h4>
+        <ul>
+          <li><a href="index.html">主页</a></li>
+          <li><a href="generator.html">wrangler.toml 生成器</a></li>
+          <li><a href="deploy.html">部署手册</a></li>
+          <li><a href="technical.html">技术文档</a></li>
+          <li><a href="changelog.html">更新日志</a></li>
+          <li><a href="网页说明文档.md">网页说明文档</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>相关链接</h4>
+        <ul>
+          <li><a href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">GitHub 仓库</a></li>
+          <li><a href="https://github.com/EasyTier/EasyTier" target="_blank" rel="noopener noreferrer">EasyTier 官方</a></li>
+          <li><a href="https://github.com/orgs/EasyTier/discussions/2512" target="_blank" rel="noopener noreferrer">另一种选择：CF Tunnel 教程</a></li>
+          <li><a href="https://ouret.ccwu.cc/" target="_blank" rel="noopener noreferrer">作者演示节点</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
+      <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/data/config-items.js"></script>
+<script src="js/main.js"></script>
+<script src="js/generator.js"></script>
+</body>
+</html>

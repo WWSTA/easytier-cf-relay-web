@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>更新日志 — easytier-cf-relay</title>
+<meta name="description" content="EasyTier Cloudflare Relay 各版本变更明细（v1.0.0 ~ v1.5.0），Keep a Changelog 格式。">
+<link rel="icon" href="favicon.ico">
+<link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/layout.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="EasyTier CF Relay 图标" width="30" height="30">
+      <span>easytier-cf-relay</span>
+    </a>
+    <nav class="site-nav" aria-label="站点导航">
+        <a href="index.html">主页</a>
+        <a href="generator.html">配置生成器</a>
+        <a href="deploy.html">部署手册</a>
+        <a href="technical.html">技术文档</a>
+        <a href="changelog.html" class="active" aria-current="page">更新日志</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
+        <svg class="icon-sun" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0Zm0 13a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13ZM0 8a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5H.75A.75.75 0 0 1 0 8Zm13 0a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5A.75.75 0 0 1 13 8Z"/><path d="M2.343 2.343a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.06-1.06a.75.75 0 0 1 0-1.06Zm9.193 9.193a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.06l-1.061-1.06a.75.75 0 0 1 0-1.06ZM2.343 13.657a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 0 1 1.061 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Zm9.193-9.193a.75.75 0 0 1 0-1.06l1.06-1.061a.75.75 0 1 1 1.06 1.06l-1.06 1.061a.75.75 0 0 1-1.06 0Z"/></svg>
+        <svg class="icon-moon" viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M12.63 2.75A7 7 0 1 0 12.63 13.25 5.5 5.5 0 1 1 12.63 2.75Z"/></svg>
+      </button>
+      <a class="btn btn-sm github-btn" href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg><span class="github-label">GitHub</span>
+      </a>
+      <button class="icon-btn nav-toggle" type="button" data-nav-toggle aria-label="展开导航" aria-expanded="false">
+        <svg viewBox="0 0 16 16" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M1 2.75A.75.75 0 0 1 1.75 2h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 2.75Zm0 5A.75.75 0 0 1 1.75 7h12.5a.75.75 0 0 1 0 1.5H1.75A.75.75 0 0 1 1 7.75ZM1.75 12h12.5a.75.75 0 0 1 0 1.5H1.75a.75.75 0 0 1 0-1.5Z"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="doc-layout">
+  <aside class="doc-sidebar" aria-label="本页目录">
+    <p class="toc-title">本页目录</p>
+    <ul>
+          <li class="toc-h2"><a href="#version-overview">版本一览</a></li>
+          <li class="toc-h2"><a href="#150-2026-10-1">[1.5.0] - 2026-10-1</a></li>
+          <li class="toc-h2 toc-extended"><a href="#142-2026-10-1">[1.4.2] - 2026-10-1</a></li>
+          <li class="toc-h2 toc-extended"><a href="#141-2026-09-19">[1.4.1] - 2026-09-19</a></li>
+          <li class="toc-h2 toc-extended"><a href="#140-2026-09-13">[1.4.0] - 2026-09-13</a></li>
+          <li class="toc-h2 toc-extended"><a href="#130-2026-09-05">[1.3.0] - 2026-09-05</a></li>
+          <li class="toc-h2 toc-extended"><a href="#120-2026-08-31">[1.2.0] - 2026-08-31</a></li>
+          <li class="toc-h2 toc-extended"><a href="#100-2026-08-26">[1.0.0] - 2026-08-26</a></li>
+    </ul>
+  </aside>
+
+  <main class="doc-article markdown-body">
+    <div class="doc-toolbar">
+      <div class="doc-meta">
+        对应源文件 <code>easytier-cf-relay-release/docs/更新日志.md</code> ·
+        <a href="https://github.com/WWSTA/easytier-cf-relay/blob/main/docs/%E6%9B%B4%E6%96%B0%E6%97%A5%E5%BF%97.md" target="_blank" rel="noopener noreferrer">在 GitHub 查看原文</a>
+      </div>
+      <div class="view-switch">
+        <span>阅读模式</span>
+        <div class="segmented" data-doc-view role="group" aria-label="阅读模式">
+          <button type="button" data-view="full" class="active" aria-pressed="true">完整视图</button>
+          <button type="button" data-view="refined" aria-pressed="false">精炼视图</button>
+        </div>
+      </div>
+    </div>
+
+<h1 id="更新日志" class="heading-anchor"><a class="anchor" href="#更新日志" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>更新日志</h1>
+<blockquote>
+<p>本文件记录每个发布版本的变更。格式参考 <a href="https://keepachangelog.com/zh-CN/1.1.0/" target="_blank" rel="noopener noreferrer">Keep a Changelog</a>，
+版本号遵循<a href="https://semver.org/lang/zh-CN/" target="_blank" rel="noopener noreferrer">语义化版本</a>。
+变更背后的协议细节与设计依据见《<a href="technical.html">技术文档</a>》，
+配置项与部署说明见《<a href="deploy.html">部署手册</a>》。</p>
+</blockquote>
+
+
+<h2 id="version-overview" class="heading-anchor"><a class="anchor" href="#version-overview" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>版本一览</h2>
+
+<div class="version-overview">
+<div class="table-wrap">
+<table>
+<thead><tr><th>版本</th><th>日期</th><th>重点</th><th>花费</th></tr></thead>
+<tbody>
+<tr><td><span class="pill">v1.5.0</span></td><td>2026-10-01</td><td>防护与观测：单连接消息速率限制、每分组节点上限、总览额度估算卡片、房间满重连修复</td><td>13 RMB</td></tr>
+<tr><td>v1.4.2</td><td>2026-10-01</td><td>安全加固：修复发往服务端 RPC 未绑定连接身份的盲区、黑名单粒度细化、常数时间 token 比较</td><td>11 RMB</td></tr>
+<tr><td>v1.4.1</td><td>2026-09-19</td><td>修复 DO 内部端点鉴权绕过；单 IP 并发限流、未知路径 tar pit、站点图标、KV 键前缀更名</td><td>15 RMB</td></tr>
+<tr><td>v1.4.0</td><td>2026-09-13</td><td>省额度优化：alarm 自适应排程、边缘黑名单缓存、管理页刷新节流、<code>/health</code> 路径自定义</td><td>13 RMB</td></tr>
+<tr><td>v1.3.0</td><td>2026-09-05</td><td>管理页行内操作修复；记录/黑名单防刷屏；Worker 边缘层 IP 拦截不唤醒 DO</td><td>9 RMB</td></tr>
+<tr><td>v1.2.0</td><td>2026-08-31</td><td>KV 审计（六类记录，每类一条键）+ 管理端黑名单 + 三个新管理页面</td><td>15 RMB</td></tr>
+<tr><td>v1.0.0</td><td>2026-08-26</td><td>首个公开版本：协议全面对齐 easytier-core 2.6.4、全 Hibernation、Web 管理端、幽灵节点六重防线</td><td>61 RMB</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<section class="doc-sec" id="150-2026-10-1-sec">
+<h2 id="150-2026-10-1" class="heading-anchor"><a class="anchor" href="#150-2026-10-1" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.5.0] - 2026-10-1</h2>
+<p>模型：GLM5.3-Flash；本次花费：13 RMB；总花费：137 RMB；</p>
+<p>防护与观测版本：补齐事前限流的最后两块缺口，管理页总览补全全部运行参数与
+限流计数，新增额度自观测卡片。(今天一次性更新两个版本)</p>
+<h3 id="新增" class="heading-anchor"><a class="anchor" href="#新增" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增</h3>
+<ul>
+<li><strong>单连接消息速率限制</strong>（<code>MSG_RATE_LIMIT_PER_SEC</code>，默认 50/秒，<code>0</code> 关闭）：
+单个连接的消息速率超限时先告警、持续超限断开（4008 rate limited），拦截次数
+计入总览「速率限流」。EasyTier 心跳 8s 1 个、路由同步爆发每秒数十个，
+默认阈值非常宽裕，正常使用零感知。</li>
+<li><strong>每分组节点数上限</strong>（<code>MAX_PEERS_PER_GROUP</code>，默认 32，<code>0</code> 不限）：单个网络
+分组的在线节点数达到上限后，该网络的新节点握手被拒（4030 group full），
+其它网络不受影响；同 peerId 重连顶替不受限。拦截次数计入总览「分组限流」。</li>
+<li><strong>管理页总览补全</strong>：新增「额度估算」卡片（今日估算计费请求 ≈ 入站消息÷20 +
+连接建立 + alarm 折算，相对 100,000/天进度条，标注为估算值）；统计卡新增
+「IP 限流 / 速率限流 / 分组限流」三个事前限流计数器；服务端卡补全此前
+未展示的运行参数（服务端网络名、摘要策略、单分组/单 IP 上限、消息速率、
+消息大小、握手/空闲超时、探活阈值、清扫周期与空闲退避）。</li>
+<li><strong>房间满重连修复</strong>：房间满的拒绝统一移到握手层（4029）并对同 peerId
+重连顶替豁免——此前升级层 HTTP 429 会把已有节点断线后的重连恢复也一并
+挡死，旧连接半开后永远无法恢复。</li>
+</ul>
+<h3 id="变更" class="heading-anchor"><a class="anchor" href="#变更" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<ul>
+<li>管理端 API 的状态接口（<code>/api/state</code>）config 字段扩充（新增 9 个此前未下发
+的运行参数），总览页据此渲染——纯增量，不影响既有消费者。</li>
+</ul>
+<h3 id="说明" class="heading-anchor"><a class="anchor" href="#说明" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>说明</h3>
+<ul>
+<li>心跳自动应答方向经官方源码审查确认不可行（客户端严格校验 Pong 序号，
+固定模板无法通过），已在迭代文档记录关闭；心跳消耗为客户端行为，
+服务端无法消除。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="142-2026-10-1-sec">
+<h2 id="142-2026-10-1" class="heading-anchor"><a class="anchor" href="#142-2026-10-1" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.4.2] - 2026-10-1</h2>
+<p>模型：GLM5.3-Flash；本次花费：11 RMB；总花费：124 RMB；</p>
+<p>安全加固修复版：修复路由投毒盲区与两处低危加固，一处管理操作语义变更。
+与 1.4.1 完全兼容。</p>
+<h3 id="修复重大" class="heading-anchor"><a class="anchor" href="#修复重大" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复（重大）</h3>
+<ul>
+<li><strong>发往服务端的 RPC 未绑定连接身份</strong>（外部审查确认并复现）：转发路径的源
+身份校验未覆盖「包直接发往服务端」的分支——同网络内任一节点可冒充其它
+在线节点自报路由（覆盖 direct 条目、篡改主机名）、覆盖他人 PeerCenter 直连
+表、伪造 RPC 响应清空路由会话（引发全量重推的流量放大）。现所有 RPC
+（请求与响应）统一校验：未握手的连接不处理；包头来源身份必须与连接注册
+身份一致，否则丢弃并计入「源伪造拦截」计数。官方客户端不受影响。</li>
+<li><strong>未握手连接可触达路由会话逻辑</strong>：与上一条同一分支、同批修复——未完成
+握手的连接发送 RPC 直接丢弃，与转发路径行为一致。</li>
+</ul>
+<h3 id="变更-2" class="heading-anchor"><a class="anchor" href="#变更-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<ul>
+<li><strong>删除分组 / 删除摘要注册的黑名单粒度改为「网络名:摘要」</strong>（digest 类）：
+此前拉黑整个网络名——在被摘要抢占的场景下，管理员删除分组/摘要注册反而
+会把同网络名的合法用户（正主）一并封锁。现按被删分组的完整
+「网络名:摘要」精确拦截抢占者；存量黑名单数据（纯网络名格式）继续生效；
+管理端手工添加的黑名单仍支持纯网络名格式。</li>
+<li>token 比较改为常数时间全覆盖（长度差异折叠进比较结果，不再提前返回）。</li>
+</ul>
+<h3 id="文档" class="heading-anchor"><a class="anchor" href="#文档" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>文档</h3>
+<ul>
+<li>部署手册：<code>?token=</code> 查询鉴权标注「会进 URL 日志，生产建议 Bearer 头」；
+标注单 IP 并发上限与边缘 IP 黑名单依赖边缘注入的 <code>CF-Connecting-IP</code>
+（非 CF 前置链路或本地 dev 下自动跳过，DO 层黑名单仍生效）。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="141-2026-09-19-sec">
+<h2 id="141-2026-09-19" class="heading-anchor"><a class="anchor" href="#141-2026-09-19" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.4.1] - 2026-09-19</h2>
+<p>模型：GLM5.3-Flash；本次花费：15 RMB；总花费：113 RMB；
+安全加固与运维小版本：修复一个管理端鉴权缺陷，补事前限流、KV 键前缀更名与站点图标。</p>
+<h3 id="修复重大-2" class="heading-anchor"><a class="anchor" href="#修复重大-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复（重大）</h3>
+<ul>
+<li><strong>DO 内部端点的鉴权可达性缺陷</strong>：管理端内部端点（<code>/internal/*</code>）可能被
+特制请求绕过 Worker 入口的 token 鉴权直达。现统一在 Durable Object 层
+拦截此类请求（一律 404），内部端点只接受 Worker 入口鉴权后的调用。</li>
+</ul>
+<h3 id="新增-2" class="heading-anchor"><a class="anchor" href="#新增-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增</h3>
+<ul>
+<li><strong>事前限流：单 IP 并发连接上限</strong>（<code>MAX_CONNS_PER_IP</code>，默认 6，<code>0</code> 关闭）：
+同一 IP 的开放连接数达到上限后新连接请求返回 429 + <code>Retry-After</code>，拦截次数
+计入总览页「IP 限流」（<code>counters.ipLimited</code>）。黑名单是事后拦截，此检查
+补上事前缺口；客户端 IP 现随连接元数据持久化（顺带修复：DO 休眠重启后
+连接列表丢 IP 的小问题）。</li>
+<li><strong>未知路径挂起不响应</strong>（<code>TARPIT_UNKNOWN</code>，默认开，<code>0</code> 恢复 404）：非 WebSocket
+升级请求访问未知路径时挂起——不返回 404、不暴露行为指纹；EasyTier 客户端
+只走升级、保留路径各有响应，均不受影响。</li>
+<li><strong>站点图标</strong>：<code>/favicon.ico</code> 返回内嵌的 128×128 项目图标（用Easytier官方图标当占位图）（原为 404），
+浏览器缓存 1 天；管理页 <code>&lt;head&gt;</code> 同步声明。</li>
+</ul>
+<h3 id="变更-3" class="heading-anchor"><a class="anchor" href="#变更-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<ul>
+<li><strong>KV 键前缀更名</strong>：<code>et-relay:</code> → <code>easytier-cf-relay:</code>。首次启动
+自动一次性迁移旧键数据（新前缀完全为空才回读旧前缀，新旧绝不混用）；
+旧键保留不删，确认运行正常后可在 Cloudflare 控制台手动清理。</li>
+<li>KV 镜像刷盘分批写（每批 ≤6 并发）：对齐免费计划「单次调用同时打开 6 个
+连接」的限制，避免多个脏键一次性并发写触发运行时排队。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="140-2026-09-13-sec">
+<h2 id="140-2026-09-13" class="heading-anchor"><a class="anchor" href="#140-2026-09-13" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.4.0] - 2026-09-13</h2>
+<p>模型：GLM5.3；本次花费：13 RMB；总花费：98 RMB；
+面向免费额度的下一代省额度优化（v2 迭代第一弹）：alarm 自适应排程、边缘黑名单
+缓存、管理页刷新节流，以及 <code>/health</code> 路径自定义。协议层无变更，与 1.3.0 完全兼容。</p>
+<h3 id="修复重大-3" class="heading-anchor"><a class="anchor" href="#修复重大-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复（重大）</h3>
+<ul>
+<li><strong><code>_markDirty()</code> 闹钟抖动导致清扫饥饿</strong>：上一版版注释说&quot;若当前无近期 alarm 才安排
+短 alarm&quot;，代码却无条件 <code>setAlarm(now+2000)</code>。客户端持续抖动重连时（握手/清理
+事件间隔 &lt;2s），闹钟被不断推到&quot;最新事件 +2s&quot;——只要抖动持续，alarm 永远落在
+未来，幽灵节点清理、路由老化、空分组删除、脏状态落盘全部停摆（事件停止后
+2s 可恢复，非死锁）；批量上线时还产生冗余 storage 写。现先 <code>getAlarm()</code>，
+仅当无闹钟或已有闹钟比目标更晚时才设置，<strong>绝不推迟更早的闹钟</strong>。</li>
+</ul>
+<h3 id="变更-4" class="heading-anchor"><a class="anchor" href="#变更-4" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<ul>
+<li><strong>alarm 自适应排程</strong>（<code>src/room.js</code>）：重挂间隔不再固定 15s，由 <code>_nextAlarmDelay()</code>
+计算——有连接时取 <code>min(SWEEP_INTERVAL_MS, 最近的 socket 事件时刻)</code>（未握手
+超时截止/探活触发/空闲超时截止，下限 1s）；完全空闲（无连接且无脏数据/审计
+待刷）退避到新配置 <code>SWEEP_IDLE_INTERVAL_MS</code>（默认 300000ms）。空房间 alarm
+消耗从 5,760 请求/天降至 <strong>288</strong>；有连接时也不再无意义地固定 15s 一醒。</li>
+<li><strong>边缘 IP 黑名单 isolate 缓存</strong>（<code>src/index.js</code>）：WS 升级前的 <code>bl:socket</code> KV 读
+加 TTL 缓存（新配置 <code>IP_BLOCK_CACHE_MS</code>，默认 30000ms，<code>&quot;0&quot;</code> 关闭），重连风暴
+时 KV 读从每次连接 1 次降为每 TTL 1 次。<strong>只延后拦截、绝不漏放</strong>：缓存未命中
+（含 KV 读失败）照旧放行走 DO 层权威黑名单检查，仅新拉黑 IP 的边缘拦截至多
+延后「KV 最终一致窗口 + TTL」。</li>
+<li><strong>管理页自动刷新省额度</strong>（<code>src/admin_ui.js</code>）：间隔 10s → 30s，<code>setInterval</code> 改
+递归 <code>setTimeout</code>，页面不可见（后台标签页/最小化）时暂停、可见时恢复。长开
+页面请求量约 8.6k → 2.9k/天，后台挂页归零。</li>
+</ul>
+<h3 id="新增-3" class="heading-anchor"><a class="anchor" href="#新增-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增</h3>
+<ul>
+<li><strong><code>/health</code> 路径自定义</strong>（<code>src/index.js</code>）：新配置 <code>HEALTH_PATH</code>（默认 <code>/health</code>，
+行为不变）。配置后仅该路径返回 <code>{&quot;ok&quot;:true}</code>，原 <code>/health</code> 返回 404（防指纹
+扫描，无需 token）；WebSocket 保留路径同步纳入。</li>
+</ul>
+<h3 id="配置" class="heading-anchor"><a class="anchor" href="#配置" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>配置</h3>
+<ul>
+<li>新增 <code>SWEEP_IDLE_INTERVAL_MS</code>（默认 <code>300000</code>，<code>0</code> 关闭退避）、
+<code>IP_BLOCK_CACHE_MS</code>（默认 <code>30000</code>，<code>0</code> 关闭缓存）、<code>HEALTH_PATH</code>（默认
+<code>/health</code>）；<code>SERVER_VERSION_STR</code> 默认值更新为 <code>easytier-cf-relay/1.4.0</code>。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="130-2026-09-05-sec">
+<h2 id="130-2026-09-05" class="heading-anchor"><a class="anchor" href="#130-2026-09-05" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.3.0] - 2026-09-05</h2>
+<p>模型：GLM5.3；本次花费：9 RMB；总花费：85 RMB；
+面向免费额度与可观测性的审计/黑名单优化，协议层无变更，与 1.2.0 完全兼容。</p>
+<h3 id="修复重大-4" class="heading-anchor"><a class="anchor" href="#修复重大-4" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复（重大）</h3>
+<ul>
+<li><strong>管理页所有列表的「操作」列按钮无实际效果</strong>：<code>esc()</code> 转义函数未处理双引号，
+<code>data-payload=&quot;{&quot;id&quot;:5}&quot;</code> 的 JSON 引号在 HTML 属性中被截断（按钮拿到的 payload
+变成残缺 JSON，解析失败退化为空对象），点击后服务端收不到目标参数。
+现将双引号一并转义为 <code>&amp;quot;</code>（文本与属性双上下文安全），全部列表的
+单行操作（踢出 / 删除分组 / 删除路由 / 删除互联 / 断开 / 删除摘要 / 删除记录 /
+移除黑名单）真实生效——<strong>无需勾选复选框即可执行</strong>（勾选仅用于顶部批量按钮）。</li>
+</ul>
+<h3 id="改进-审计记录防刷屏-省额度" class="heading-anchor"><a class="anchor" href="#改进-审计记录防刷屏-省额度" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>改进 — 审计记录（防刷屏 + 省额度）</h3>
+<ul>
+<li><strong>黑名单拒绝事件不再写入「节点在线」记录</strong>：被拉黑客户端会不断重连，
+逐条记录会刷爆记录列表并徒增 DO storage/KV 写入；拒绝改由总览页新增的
+<strong>「黑名单拦截」计数器</strong>（<code>counters.blRejected</code>）观测，零写入成本。</li>
+<li><strong>管理端「查看」事件不再记录</strong>：管理页 10s 自动刷新会持续产生查看记录
+（原先按 5 分钟折叠计数），既刷屏又浪费写入；登录（IP/时间，10 分钟去重）
+与操作明细仍为硬审计。</li>
+</ul>
+<h3 id="改进-黑名单拦截双层省-do-额度" class="heading-anchor"><a class="anchor" href="#改进-黑名单拦截双层省-do-额度" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>改进 — 黑名单拦截（双层，省 DO 额度）</h3>
+<ul>
+<li>新增 <strong>Worker 入口边缘层 IP 拦截</strong>：WebSocket 升级前直接读 KV 的
+<code>bl:socket</code> 一条键，命中立即 403（附 <code>Retry-After: 60</code>）——<strong>不唤醒
+Durable Object</strong>，被拉黑客户端的重连风暴只消耗 Worker 请求额度，
+不再消耗 DO 请求与时长计费。</li>
+<li>DO 层（升级 / 握手）保留为权威兜底：覆盖 KV 最终一致窗口（约 1 分钟）内
+新拉黑的 IP；KV 读失败时边缘层放行、DO 层拦截（边缘 fail-open、DO fail-closed）。</li>
+<li>解除封锁的生效时间 = KV 传播时间（通常数秒，最长约 1 分钟）。</li>
+<li>未绑定 <code>AUDIT_KV</code> 时边缘层自动跳过，行为与 1.2.0 一致。</li>
+</ul>
+<h3 id="新增-记录查询全部视图" class="heading-anchor"><a class="anchor" href="#新增-记录查询全部视图" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 记录查询「全部」视图</h3>
+<ul>
+<li>记录类型下拉首项新增**「全部」**：七类记录（六类数据 + 管理端审计）在内存
+合并，按全局 id（= 时间序）倒序分页，附「类型」列——不引入任何新 KV 键。</li>
+<li>「全部」模式支持按 id 跨类型删除（单个 / 批量）；admin 硬记录仅展示，
+该行的勾选与删除按钮均禁用（服务端同样拒绝，双保险）。</li>
+</ul>
+<h3 id="其它" class="heading-anchor"><a class="anchor" href="#其它" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>其它</h3>
+<ul>
+<li>403 拒绝响应附带 <code>Retry-After: 60</code>，建议客户端退避重试。</li>
+<li>文档：技术文档 §9 重写拦截层次与成本说明；部署手册新增 Q11（重连风暴与免费额度）、
+更新成本核算与 KV 读额度说明；多房间分片下 KV 审计的共享键限制已注明。</li>
+</ul>
+<h3 id="验证" class="heading-anchor"><a class="anchor" href="#验证" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>验证</h3>
+<ul>
+<li>语法与构建静态检查通过；协议行为（对齐 easytier-core 2.6.4 官方客户端）、
+管理端全部页面的行内操作与批量操作、KV 审计/黑名单全链路（含边缘层拦截
+不唤醒 DO、「全部」合并查询与跨类型删除）均经回归验证通过。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="120-2026-08-31-sec">
+<h2 id="120-2026-08-31" class="heading-anchor"><a class="anchor" href="#120-2026-08-31" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.2.0] - 2026-08-31</h2>
+<p>模型：GLM5.3；本次花费：15 RMB；总花费：76 RMB；
+在 1.0.0 协议完备的基础上补齐「可观测 + 可管控」：新增 KV 审计记录与管理端黑名单，
+管理控制台新增三个页面（记录查询 / 记录设置 / 黑名单）。协议层无变更，与 1.0.0 完全兼容。</p>
+<h3 id="新增-kv-审计记录" class="heading-anchor"><a class="anchor" href="#新增-kv-审计记录" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — KV 审计记录</h3>
+<ul>
+<li>六类网络事件记录进 Workers KV：网络分组 / 节点在线 / 路由信息 / 全局互联 / 连接列表 /
+摘要注册（<strong>每类只占一条 KV 键</strong>，定长环形缓冲；连同管理端审计与黑名单全生命周期共 11 条键）</li>
+<li>事件明细：分组 create / delete（含原因）、节点 join / leave / replace / reject（含 IP）、
+路由 add / remove（direct / transit 与顶替记录）、互联 add / remove（含 TTL 过期）、
+连接 open / close / error（含 socketId、IP）、摘要 register / delete</li>
+<li>管理端硬审计：管理员登录（IP / 时间）、查看（5 分钟折叠计数）、操作明细；
+<code>ADMIN_AUDIT</code> 为硬开关，管理页不可关闭，admin 类记录不可删除（防审计自擦除）</li>
+<li>三级写入路径控成本：事件先入内存数组 → alarm 周期落 DO storage（防休眠丢失）→
+KV 镜像仅写脏键并按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）节流；管理操作完成后强制刷 KV
+（黑名单立即生效）。免费额度 1000 写/天下默认每键最多 144 写/天，典型小网络每天合计数十次</li>
+<li>未配置 <code>AUDIT_KV</code> 绑定时优雅降级为仅 DO storage 存储，管理页功能不受影响</li>
+</ul>
+<h3 id="新增-管理端黑名单" class="heading-anchor"><a class="anchor" href="#新增-管理端黑名单" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 管理端黑名单</h3>
+<ul>
+<li>四类黑名单各占一条 KV 键：节点 PeerId / 网络分组（网络名）/ 摘要注册 / 客户端 IP</li>
+<li>管理操作自动拉黑：踢出节点 → peer；删除分组 → group（网络名）；删除摘要注册 → digest；
+断开连接 → socket（已知客户端 IP）</li>
+<li>双拦截点：WebSocket 升级时按客户端 IP 403 拒绝；握手（摘要校验前）按 peer / group / digest
+关闭连接（4013 blacklisted），拒绝事件记入节点记录</li>
+<li>黑名单页支持手工添加（含备注原因）、单个与批量移除（解除封锁）、整类清空；
+上限 <code>BLACKLIST_LIMIT</code>（默认 1000）为硬设置</li>
+</ul>
+<h3 id="新增-web-管理端三个新页面" class="heading-anchor"><a class="anchor" href="#新增-web-管理端三个新页面" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — Web 管理端（三个新页面）</h3>
+<ul>
+<li>记录查询：按类型筛选 + 分页浏览六类记录与管理端审计，支持单个与批量删除（admin 类不可删）</li>
+<li>记录设置：六类记录各自的开 / 关与条数上限（软设置，运行时生效，收紧上限时立即裁剪旧记录）</li>
+<li>黑名单：四类黑名单的查询 / 添加 / 移除 / 清空，含各类条数统计</li>
+<li>侧边栏新增「记录查询 / 记录设置 / 黑名单」功能块与统计徽标，总览页汇总审计统计</li>
+</ul>
+<h3 id="新增-配置项wranglertoml" class="heading-anchor"><a class="anchor" href="#新增-配置项wranglertoml" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 配置项（wrangler.toml）</h3>
+<ul>
+<li><code>AUDIT_KV</code> KV namespace 绑定（可选）</li>
+<li><code>RECORD_FLUSH_MS</code>（KV 镜像节流间隔，默认 600000）</li>
+<li><code>RECORD_DEFAULT_LIMIT</code>（各类记录默认上限，默认 100）</li>
+<li><code>BLACKLIST_LIMIT</code>（各黑名单上限，默认 1000）</li>
+<li><code>ADMIN_AUDIT</code> / <code>ADMIN_AUDIT_LIMIT</code>（管理端审计硬开关与上限，默认开 / 200）</li>
+</ul>
+<h3 id="修复" class="heading-anchor"><a class="anchor" href="#修复" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
+<ul>
+<li>运行时长在 DO 休眠或重启后重新计时的问题：首次启动时间持久化到 DO storage，
+现按房间首次创建起累计（含休眠时间），管理页附说明提示</li>
+<li>管理端命名与统计口径统一：连接（sockets）与管理端审计纳入总览统计，
+侧边栏徽标与总览汇总一致</li>
+</ul>
+<h3 id="文档-2" class="heading-anchor"><a class="anchor" href="#文档-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>文档</h3>
+<ul>
+<li>技术文档新增 §9「KV 审计与管理端黑名单」；部署手册新增 5.6 节（KV 审计配置）并更新成本章节；
+README 同步功能清单</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="100-2026-08-26-sec">
+<h2 id="100-2026-08-26" class="heading-anchor"><a class="anchor" href="#100-2026-08-26" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.0.0] - 2026-08-26</h2>
+<p>模型：GLM5.3；本次花费：61 RMB；总花费：61 RMB；
+首个公开发布版本。协议行为以官方 easytier-core <strong>v2.6.4</strong> 源码为基准逐项对齐，
+并使用官方客户端实测验证：握手、路由同步、双节点互见、数据中继、长稳运行全部通过。</p>
+<h3 id="新增-协议层对标官方-easytier-core-264" class="heading-anchor"><a class="anchor" href="#新增-协议层对标官方-easytier-core-264" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 协议层（对标官方 easytier-core 2.6.4）</h3>
+<ul>
+<li><p>ZCPacket / PeerManagerHeader（16 字节小端头）解析与构造</p>
+</li>
+<li><p>WebSocket 隧道：接受任意路径的升级请求（与官方服务端行为一致）</p>
+</li>
+<li><p>握手：magic / version / features 镜像 / 网络摘要校验
+（SipHash-1-3，与官方同算法同密钥派生）</p>
+</li>
+<li><p>Ping/Pong 心跳：payload 原样回显（支持客户端自增 seq），liveness-echo flags 镜像</p>
+</li>
+<li><p>RPC 分发：RpcPacket / RpcRequest / RpcResponse，int64 transaction_id 全精度</p>
+</li>
+<li><p>OspfRouteRpc.SyncRouteInfo：请求处理 + 响应 + 主动推送（全量 / 增量）</p>
+</li>
+<li><p>路由增量同步：version / peer_route_id / session 语义（peer_route_id 变化即无条件替换）</p>
+</li>
+<li><p>RoutePeerInfo 未知字段逐字节保留（wire 层重组，对标官方 raw_peer_infos 机制）</p>
+</li>
+<li><p>PeerCenterRpc.ReportPeers / GetGlobalPeerMap：官方 replace 语义 + digest 缓存</p>
+</li>
+<li><p>包转发：forward_counter 每跳 +1、&gt;7 丢弃、转发时清除 LATENCY_FIRST</p>
+</li>
+<li><p>同 peerId 重连顶替：旧连接关闭 + 路由更新广播</p>
+</li>
+<li><p>加密包（ENCRYPTED flag）透传不受影响</p>
+</li>
+<li><p>网络分组隔离：网络名 + 摘要 → 独立分组，互不可见</p>
+</li>
+</ul>
+<h3 id="新增-平台层cloudflare-workers" class="heading-anchor"><a class="anchor" href="#新增-平台层cloudflare-workers" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 平台层（Cloudflare Workers）</h3>
+<ul>
+<li><p>Worker 入口：<code>/health</code> 零指纹；<code>/metrics</code> 与 Web 管理端为自定义安全路径 + token
+双门禁（fail-closed，不配置即 404，零攻击面）</p>
+</li>
+<li><p>RelayRoom Durable Object：全 WebSocket Hibernation API，全程零 setInterval/setTimeout 常驻</p>
+</li>
+<li><p>Alarm 驱动周期清扫（DO 可休眠，duration 成本趋零，免费额度内稳定运行）</p>
+</li>
+<li><p>attachment 元数据：休眠唤醒后恢复 peerId / groupKey / lastSeen</p>
+</li>
+<li><p>路由状态持久化：脏标记 + 节流落盘，损坏数据静默丢弃</p>
+</li>
+<li><p>多房间分片（Header / Query 可配置）</p>
+</li>
+</ul>
+<h3 id="新增-web-管理端" class="heading-anchor"><a class="anchor" href="#新增-web-管理端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — Web 管理端</h3>
+<ul>
+<li><p>侧边栏列表式导航：总览 / 网络分组 / 节点在线 / 路由信息 / 全局互联 / 连接列表 / 摘要注册表</p>
+</li>
+<li><p>服务端分页 + 各列表独立滚动：节点数量大时打开管理页不卡不爆</p>
+</li>
+<li><p>各功能块自带统计（侧边栏徽标 + 总览页汇总）</p>
+</li>
+<li><p>全功能块批量操作（单个与批量均支持）：踢出节点 / 删除分组 / 删除路由条目 /
+删除互联条目 / 断开连接 / 删除摘要注册</p>
+</li>
+<li><p>路由信息与摘要注册表支持单独删除</p>
+</li>
+<li><p>官方 easytier-cli 命令对照表</p>
+</li>
+<li><p>数据 API 全部经 token 鉴权（页面壳公开、数据不公开）</p>
+</li>
+</ul>
+<h3 id="新增-稳定性与自动清理" class="heading-anchor"><a class="anchor" href="#新增-稳定性与自动清理" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 稳定性与自动清理</h3>
+<ul>
+<li><p>幽灵节点六重防线（详见技术文档 §6）：</p>
+<ul>
+<li><p>连接级：握手超时（15s）/ 空闲超时（75s）/ 服务端主动探活（40s）</p>
+</li>
+<li><p>路由级：direct/transit 来源标记（transit 永不覆盖 direct）+ reporter 追踪 /
+路由老化（对齐官方 <code>clear_expired_peer</code> 两层语义：不可达 90s / TTL 3660s）/
+空分组自动删除（宽限 60s）</p>
+</li>
+</ul>
+</li>
+<li><p>空分组自动删除：分组内在线节点归零并持续超过宽限期 → 整组删除（含路由条目与摘要注册）</p>
+</li>
+<li><p>摘要注册表自愈：孤儿摘要注册随分组删除一并解除，不留脏数据</p>
+</li>
+</ul>
+<h3 id="新增-安全加固" class="heading-anchor"><a class="anchor" href="#新增-安全加固" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>新增 — 安全加固</h3>
+<ul>
+<li><p>STRICT_DIGEST：同一网络名出现不同摘要时拒绝（防网络名抢占）</p>
+</li>
+<li><p>NETWORK_SECRETS：服务端侧网络密钥校验（SipHash-1-3 摘要比对）</p>
+</li>
+<li><p>MAX_MESSAGE_BYTES / MAX_PEERS_PER_ROOM 资源限制</p>
+</li>
+<li><p>转发前校验 from_peer_id 与连接注册身份一致（伪造源丢弃并计数）</p>
+</li>
+<li><p>路由 transit 条目不覆盖 direct 条目（防路由投毒 / 防幽灵复活）</p>
+</li>
+<li><p>PeerCenter 上报以连接注册身份为准（防身份冒用）</p>
+</li>
+</ul>
+<h3 id="修复开发过程中定位并解决" class="heading-anchor"><a class="anchor" href="#修复开发过程中定位并解决" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复（开发过程中定位并解决）</h3>
+<ul>
+<li><p><strong>幽灵节点（重大）</strong>：客户端多 PeerId 竞争后，被放弃的 PeerId 作为 transit 条目
+被其他节点转述上报，导致路由表出现&quot;无在线连接的幽灵条目&quot;（节点实际只有一个连接）。
+通过 reporter 追踪（上报者断开即清除其上报的无主 transit 条目）+ direct 覆盖规则 +
+路由老化三层机制根除，同类残留此后自动清理。</p>
+</li>
+<li><p>管理端&quot;官方 easytier-cli 命令对照&quot;表格右侧溢出：容器改为允许横向滚动。</p>
+</li>
+<li><p><code>wrangler deploy</code> 多环境警告：deploy / dry-run 脚本显式指定 <code>--env=&quot;&quot;</code>，
+明确使用顶层环境，避免误部署到错误环境。</p>
+</li>
+</ul>
+<h3 id="已知限制" class="heading-anchor"><a class="anchor" href="#已知限制" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>已知限制</h3>
+<ul>
+<li><p>不支持 secure mode（Noise，v2.6.0+ 可选加密握手）——客户端使用默认模式即可</p>
+</li>
+<li><p>不执行 P2P 打洞（Workers 无 UDP 出口），仅提供 rendezvous；双端严格 NAT 时走中继</p>
+</li>
+<li><p>不做 KCP/QUIC 协议转换（相关包按 to_peer_id 原样转发，无功能影响）</p>
+</li>
+<li><p>单房间为 DO 单线程串行（软限制 ~1000 req/s）；更大规模使用房间分片</p>
+</li>
+</ul>
+<p>完整列表见技术文档 §11。</p>
+
+</section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="" width="24" height="24">
+          <span>easytier-cf-relay</span>
+        </div>
+        <p class="mb-0">在 Cloudflare Workers 免费额度内运行 EasyTier 自建 WebSocket 节点——无需 VPS，纯 P2P 优先（中继仅兜底），全 Hibernation API 空闲成本趋零。</p>
+      </div>
+      <div>
+        <h4>站点导航</h4>
+        <ul>
+          <li><a href="index.html">主页</a></li>
+          <li><a href="generator.html">wrangler.toml 生成器</a></li>
+          <li><a href="deploy.html">部署手册</a></li>
+          <li><a href="technical.html">技术文档</a></li>
+          <li><a href="changelog.html">更新日志</a></li>
+          <li><a href="网页说明文档.md">网页说明文档</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>相关链接</h4>
+        <ul>
+          <li><a href="https://github.com/WWSTA/easytier-cf-relay" target="_blank" rel="noopener noreferrer">GitHub 仓库</a></li>
+          <li><a href="https://github.com/EasyTier/EasyTier" target="_blank" rel="noopener noreferrer">EasyTier 官方</a></li>
+          <li><a href="https://github.com/orgs/EasyTier/discussions/2512" target="_blank" rel="noopener noreferrer">另一种选择：CF Tunnel 教程</a></li>
+          <li><a href="https://ouret.ccwu.cc/" target="_blank" rel="noopener noreferrer">作者演示节点</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
+      <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

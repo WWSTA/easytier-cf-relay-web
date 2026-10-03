@@ -1,0 +1,124 @@
+/* ==========================================================================
+   variables.css — 明/暗双主题变量
+   配色对齐 GitHub Primer（light / dark），由 <html data-theme="..."> 驱动
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* 背景 */
+  --bg-default: #ffffff;
+  --bg-subtle: #f6f8fa;
+  --bg-inset: #f6f8fa;
+  --bg-muted: rgba(175, 184, 193, 0.2);
+  --bg-header: rgba(255, 255, 255, 0.85);
+  --bg-overlay: #ffffff;
+
+  /* 边框 */
+  --border-default: #d0d7de;
+  --border-muted: #d8dee4;
+
+  /* 文本 */
+  --fg-default: #1f2328;
+  --fg-muted: #656d76;
+  --fg-subtle: #6e7781;
+  --fg-on-emphasis: #ffffff;
+
+  /* 强调色（蓝） */
+  --accent-fg: #0969da;
+  --accent-emphasis: #0969da;
+  --accent-muted: rgba(84, 174, 255, 0.4);
+  --accent-subtle: #ddf4ff;
+
+  /* 成功（绿） */
+  --success-fg: #1a7f37;
+  --success-emphasis: #1f883d;
+  --success-subtle: #dafbe1;
+
+  /* 注意（黄） */
+  --attention-fg: #9a6700;
+  --attention-subtle: #fff8c5;
+
+  /* 危险（红） */
+  --danger-fg: #d1242f;
+  --danger-emphasis: #cf222e;
+  --danger-subtle: #ffebe9;
+
+  /* 已完成（紫） */
+  --done-fg: #8250df;
+  --done-subtle: #fbefff;
+
+  /* 代码 */
+  --code-bg: rgba(175, 184, 193, 0.2);
+  --code-block-bg: #f6f8fa;
+
+  /* 阴影 */
+  --shadow-small: 0 1px 0 rgba(31, 35, 40, 0.04);
+  --shadow-medium: 0 3px 6px rgba(140, 149, 159, 0.15);
+  --shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
+
+  /* 装饰 */
+  --hero-glow-a: rgba(9, 105, 218, 0.1);
+  --hero-glow-b: rgba(130, 80, 223, 0.1);
+
+  /* 字体 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    "Sarasa Mono SC", "Microsoft YaHei Mono", monospace;
+
+  /* 布局 */
+  --header-height: 64px;
+  --container-max: 1280px;
+  --radius: 6px;
+  --radius-lg: 12px;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-default: #0d1117;
+  --bg-subtle: #161b22;
+  --bg-inset: #010409;
+  --bg-muted: rgba(110, 118, 129, 0.4);
+  --bg-header: rgba(13, 17, 23, 0.85);
+  --bg-overlay: #161b22;
+
+  --border-default: #30363d;
+  --border-muted: #21262d;
+
+  --fg-default: #e6edf3;
+  --fg-muted: #8b949e;
+  --fg-subtle: #7d8590;
+  --fg-on-emphasis: #ffffff;
+
+  --accent-fg: #58a6ff;
+  --accent-emphasis: #1f6feb;
+  --accent-muted: rgba(56, 139, 253, 0.4);
+  --accent-subtle: rgba(56, 139, 253, 0.15);
+
+  --success-fg: #3fb950;
+  --success-emphasis: #238636;
+  --success-subtle: rgba(46, 160, 67, 0.15);
+
+  --attention-fg: #d29922;
+  --attention-subtle: rgba(187, 128, 9, 0.15);
+
+  --danger-fg: #f85149;
+  --danger-emphasis: #da3633;
+  --danger-subtle: rgba(248, 81, 73, 0.1);
+
+  --done-fg: #a371f7;
+  --done-subtle: rgba(163, 113, 247, 0.15);
+
+  --code-bg: rgba(110, 118, 129, 0.4);
+  --code-block-bg: #161b22;
+
+  --shadow-small: 0 0 transparent;
+  --shadow-medium: 0 3px 6px rgba(1, 4, 9, 0.5);
+  --shadow-large: 0 8px 24px rgba(1, 4, 9, 0.6);
+
+  --hero-glow-a: rgba(56, 139, 253, 0.14);
+  --hero-glow-b: rgba(163, 113, 247, 0.12);
+}
