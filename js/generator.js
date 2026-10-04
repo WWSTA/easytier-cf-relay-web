@@ -83,6 +83,9 @@
 
   var state = mergeSaved(defaults(), readSaved());
 
+  // 旧版本默认值为非补零日期（2026-10-1），已存本地的旧值自动迁移为标准 YYYY-MM-DD 格式
+  if (state.deploy.date === '2026-10-1') state.deploy.date = '2026-10-01';
+
   function readSaved() {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
@@ -197,8 +200,15 @@
       return null;
     },
     date: function (v) {
-      if (!/^\d{4}-\d{1,2}-\d{1,2}$/.test(v.trim())) {
-        return { level: 'error', msg: '格式应为 YYYY-M-D（如 2026-10-1）' };
+      var t = v.trim();
+      // wrangler 要求补零的 ISO 日期格式 YYYY-MM-DD（如 2026-10-01）
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+        return { level: 'error', msg: '格式应为补零的 YYYY-MM-DD（如 2026-10-01，月份与日期不足两位需补 0）' };
+      }
+      var p = t.split('-').map(Number);
+      var d = new Date(p[0], p[1] - 1, p[2]);
+      if (d.getFullYear() !== p[0] || d.getMonth() !== p[1] - 1 || d.getDate() !== p[2]) {
+        return { level: 'error', msg: '不是真实存在的日期' };
       }
       return null;
     },

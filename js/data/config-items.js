@@ -15,7 +15,7 @@ window.ETCF_CONFIG = {
   /* 顶层部署元信息 */
   deploy: {
     name: { default: 'easytier-cf-relay', validate: 'workerName' },
-    compatibilityDate: { default: '2026-10-1', validate: 'date' },
+    compatibilityDate: { default: '2026-10-01', validate: 'date' },
     domain: { enabled: false, pattern: 'et.example.com', mode: 'custom_domain', zone: 'example.com' },
   },
 
