@@ -1,15 +1,24 @@
 /**
  * config-items.js — wrangler.toml 生成器的配置项定义
  *
- * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.5.0）为唯一基准，
- * 逐项保持一致。生成器 js/generator.js 读取本文件渲染表单并实时输出 TOML。
+ * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.0）为唯一基准：
+ *   - comment 逐字复制 wrangler.toml 里对应变量上方的注释（含多行，用 \n 分行）；
+ *     wrangler.toml 没写注释的变量（SERVER_HOSTNAME / SERVER_VERSION_STR /
+ *     ROUTE_INFO_TTL_MS / ADMIN_AUDIT_LIMIT / ROOM_*）comment 留空，生成时不输出；
+ *   - 组级 header 对应 wrangler.toml 里的分节注释块（KV 审计 / 监控与管理端 /
+ *     额度观测等），生成时原样输出在组内变量之前。
+ * 生成器 js/generator.js 读取本文件渲染表单并实时输出 TOML。
  *
  * 字段说明：
- *   kind: 'single' | 'pair'
+ *   kind: 'single' | 'pair' | 'note'
+ *         note = 纯说明项：表单里只展示文字，TOML 里只输出 comment 注释块
+ *                （用于 CF_API_TOKEN 这类只允许 secret 注入、绝不写入明文的变量）
  *   type: 'text' | 'number' | 'select' | 'json'
  *   optional: true 表示默认关闭，需在页面上打开开关才写入配置（关闭时以注释形式保留）
+ *   noEmit: true 表示只进表单、不进 [vars]（如 KV / AE 的绑定 id）
  *   validate: 校验规则名，见 generator.js
- *   comment: 写入 TOML 的一行中文注释
+ *   comment: 写入 TOML 的注释（可多行，逐字对应 wrangler.toml）
+ *   groups[].header: 该组在 TOML 里的分节注释块（逐字对应 wrangler.toml）
  */
 window.ETCF_CONFIG = {
   /* 顶层部署元信息 */
@@ -25,6 +34,10 @@ window.ETCF_CONFIG = {
       title: '基础身份',
       desc: '节点在网络中的身份与宣告信息',
       open: true,
+      header: [
+        'WebSocket 路径：接受任意路径的升级请求（与官方服务端行为一致），',
+        '客户端 -p 直接使用 wss://<域名> 即可；/health 与 /metrics 保留',
+      ],
       items: [
         {
           kind: 'single',
@@ -51,17 +64,17 @@ window.ETCF_CONFIG = {
           label: '节点主机名',
           type: 'text',
           default: 'easytier-cf-relay',
-          comment: '节点主机名（easytier-cli peer 路由表显示）',
-          help: '路由表中显示的节点名。',
+          comment: '',
+          help: '路由表中显示的节点名（wrangler.toml 未加注释）。',
         },
         {
           kind: 'single',
           key: 'SERVER_VERSION_STR',
           label: '节点版本串',
           type: 'text',
-          default: 'easytier-cf-relay/1.5.0',
-          comment: '节点版本串（easytier-cli peer 可见）',
-          help: 'easytier-cli peer 中可见的版本号。',
+          default: 'easytier-cf-relay/1.6.0',
+          comment: '',
+          help: 'easytier-cli peer 中可见的版本号，随版本发布更新（wrangler.toml 未加注释）。',
         },
         {
           kind: 'single',
@@ -81,7 +94,7 @@ window.ETCF_CONFIG = {
             { value: 'afr', label: 'afr — 非洲' },
             { value: 'me', label: 'me — 中东' },
           ],
-          comment: '指定 Durable Object 地区（可选值：wnam/enam/sam/weur/eeur/apac/oc/afr/me）',
+          comment: '指定 Durable Object 地区配置（可选值：wnam 西部地区（北美）enam 东部地区（北美）sam 南美洲 weur 西欧 eeur 东欧 apac\t亚太地区（已设置，默认未开启） oc 大洋洲 afr 非洲 me 中东）',
           help: '指定 DO 运行地区（官方注释默认未开启）。一般无需设置，交给 Cloudflare 就近调度。',
         },
       ],
@@ -103,7 +116,7 @@ window.ETCF_CONFIG = {
             { value: '1', label: '1 — 宣告 avoid_relay_data（推荐）' },
             { value: '0', label: '0 — 不宣告' },
           ],
-          comment: '纯 P2P 模式：1 = 宣告 avoid_relay_data（OSPF 大代价边，客户端优先直连）',
+          comment: '纯 P2P 模式：1 = 在 feature_flag 中宣告 avoid_relay_data（OSPF 给本节点边赋大代价，\n客户端优先直连 P2P，中继仅作兜底）；0 = 不宣告',
           help: '在 feature_flag 中宣告 avoid_relay_data，OSPF 给本节点边赋大代价，客户端优先 P2P 直连。',
         },
         {
@@ -116,7 +129,7 @@ window.ETCF_CONFIG = {
             { value: '1', label: '1 — 转发 Data/KCP（P2P 失败时兜底）' },
             { value: '0', label: '0 — 丢弃（严格纯 P2P，仅控制面）' },
           ],
-          comment: '是否转发 Data/KCP 数据包（P2P 失败时的兜底通道）：1 = 转发；0 = 丢弃（严格纯 P2P）',
+          comment: '是否继续转发 Data/KCP 数据包（P2P 失败时的兜底通道）：1 = 转发；0 = 丢弃（严格纯 P2P）',
           help: 'P2P 打洞失败的流量是否经本节点兜底转发；0 = 严格纯 P2P，只保留控制面。',
         },
       ],
@@ -145,7 +158,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '6',
           validate: 'int',
-          comment: '单 IP 并发连接上限（事前限流）：达限新升级请求 429 + Retry-After；0 = 关闭',
+          comment: '单 IP 并发连接上限（v1.4.1，事前限流）：防单 IP 用普通握手占满房间；\n仅 DO 升级层权威检查；同 NAT 多节点共享出口 IP，默认 6；0 = 关闭',
           help: '达限返回 429。同 NAT 多节点共享出口 IP 时按需调大；0 = 关闭。依赖 CF-Connecting-IP。',
         },
         {
@@ -155,7 +168,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '50',
           validate: 'int',
-          comment: '单连接消息速率上限（条/秒）：持续超限断开 4008；0 = 关闭',
+          comment: '单连接消息速率上限（v1.5，事前限流）：每连接每秒最大消息数，持续超限断开\n（4008）；EasyTier 心跳 8s 1 个、路由同步爆发每秒数十个，默认 50 宽裕；0 = 关闭',
           help: 'EasyTier 心跳 8s 1 个、路由同步爆发每秒数十个，默认 50 宽裕；0 = 关闭。',
         },
         {
@@ -165,7 +178,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '32',
           validate: 'int',
-          comment: '每分组 peer 上限：达限该网络新节点握手被拒 4030；0 = 不限',
+          comment: '每分组 peer 上限（v1.5）：单个网络分组的在线节点数上限，防单网络占满房间；\n0 = 不限（仅受 MAX_PEERS_PER_ROOM 约束）',
           help: '防单网络占满房间；同 peerId 重连顶替不受限；0 = 不限。',
         },
         {
@@ -185,7 +198,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '15000',
           validate: 'int',
-          comment: '未握手连接超时（毫秒）—— 幽灵连接清理（防线一）',
+          comment: '未握手连接超时（毫秒）—— 幽灵连接清理',
           help: '连接建立后未完成握手的 socket 直接关闭（防线一）。',
         },
         {
@@ -195,7 +208,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '75000',
           validate: 'peerIdle',
-          comment: '空闲超时（毫秒）。必须大于客户端 ping 最大间隔 32s（防线二）',
+          comment: '空闲超时（毫秒）。必须大于客户端 ping 最大间隔 32s',
           help: '必须 > 客户端 ping 最大间隔 32s（防线二）。',
         },
         {
@@ -205,38 +218,8 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '40000',
           validate: 'int',
-          comment: '服务端主动 ping 阈值（毫秒）：空闲超过该值发送 Ping 探活（防线三）',
+          comment: '服务端主动 ping 阈值（毫秒）：空闲超过该值发送 Ping 探活',
           help: '探测半开连接（防线三）。',
-        },
-        {
-          kind: 'single',
-          key: 'ROUTE_INFO_UNREACHABLE_MS',
-          label: '路由不可达老化（毫秒）',
-          type: 'number',
-          default: '90000',
-          validate: 'int',
-          comment: '路由条目未刷新且节点不可达超时删除（防线五，对齐官方 clear_expired_peer）',
-          help: '条目未刷新且节点不可达超时 → 删除（防线五）。',
-        },
-        {
-          kind: 'single',
-          key: 'ROUTE_INFO_TTL_MS',
-          label: '路由条目 TTL（毫秒）',
-          type: 'number',
-          default: '3660000',
-          validate: 'int',
-          comment: '条目未刷新超 61 分钟无条件删除（防线五）',
-          help: '未刷新超过该时长无条件删除（61 分钟）。',
-        },
-        {
-          kind: 'single',
-          key: 'GROUP_AUTO_DELETE_MS',
-          label: '空分组自动删除宽限（毫秒）',
-          type: 'number',
-          default: '60000',
-          validate: 'int',
-          comment: '空分组自动删除宽限（毫秒）：归零持续该时长仍为空 → 整组删除；0 = 关闭（防线六）',
-          help: '含路由条目与摘要注册一并清理；0 = 关闭（防线六）。',
         },
         {
           kind: 'single',
@@ -245,7 +228,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '15000',
           validate: 'int',
-          comment: '清扫周期（毫秒），alarm 自适应排程（有连接时至多该周期一次）',
+          comment: '清扫周期（毫秒），alarm 按自适应排程唤醒 DO（有连接时至多该周期一次）',
           help: 'alarm 自适应排程的上限周期。',
         },
         {
@@ -255,18 +238,9 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '300000',
           validate: 'int',
-          comment: '空闲退避（毫秒）：空房间 alarm 退避（5760 → 288 请求/天）；0 = 关闭',
+          comment: '空闲退避（毫秒）：房间无连接且无脏数据时 alarm 退避到该间隔（默认 5 分钟），\n空房间消耗从 5760 请求/天降至 288；0 = 关闭（退回 SWEEP_INTERVAL_MS）',
           help: '空房间 alarm 退避到该间隔（默认 5 分钟）；0 = 关闭。',
         },
-      ],
-    },
-
-    {
-      id: 'security',
-      title: '安全',
-      desc: '摘要策略与未知路径防护',
-      open: true,
-      items: [
         {
           kind: 'single',
           key: 'STRICT_DIGEST',
@@ -277,9 +251,117 @@ window.ETCF_CONFIG = {
             { value: '1', label: '1 — 同网络名不同摘要拒绝（推荐）' },
             { value: '0', label: '0 — 隔离为不同分组' },
           ],
-          comment: '摘要策略：1 = 同一网络名出现不同摘要时拒绝（防抢占/防嗅探）；0 = 隔离为不同分组',
+          comment: '摘要策略：1 = 同一网络名出现不同摘要时拒绝（默认，防抢占/防嗅探）；0 = 隔离为不同分组',
           help: '防止网络名被不同密钥恶意抢占。',
         },
+        {
+          kind: 'single',
+          key: 'ROUTE_INFO_UNREACHABLE_MS',
+          label: '路由不可达老化（毫秒）',
+          type: 'number',
+          default: '90000',
+          validate: 'int',
+          comment: '幽灵节点老化（对齐官方 clear_expired_peer）：\n- ROUTE_INFO_UNREACHABLE_MS：条目未刷新且节点不可达超过该时长 → 删除（默认 90000）\n- ROUTE_INFO_TTL_MS：条目未刷新超过该时长 → 无条件删除（默认 3660000）',
+          help: '条目未刷新且节点不可达超时 → 删除（防线五，对齐官方 clear_expired_peer）。',
+        },
+        {
+          kind: 'single',
+          key: 'ROUTE_INFO_TTL_MS',
+          label: '路由条目 TTL（毫秒）',
+          type: 'number',
+          default: '3660000',
+          validate: 'int',
+          comment: '',
+          help: '未刷新超过该时长无条件删除（61 分钟）；注释见上一项（wrangler.toml 未单独加注释）。',
+        },
+        {
+          kind: 'single',
+          key: 'GROUP_AUTO_DELETE_MS',
+          label: '空分组自动删除宽限（毫秒）',
+          type: 'number',
+          default: '60000',
+          validate: 'int',
+          comment: '空分组自动删除宽限（毫秒）：分组内在线节点归零后持续该时长仍为空 →\n整组删除（含路由条目与摘要注册）；0 = 关闭。默认 60000',
+          help: '含路由条目与摘要注册一并清理；0 = 关闭（防线六）。',
+        },
+      ],
+    },
+
+    {
+      id: 'abuse',
+      title: '资源滥用防线（v1.6）',
+      desc: '路由洪泛 / 请求放大 / 出站与状态总量多维上限；均为处理途中同步检查，正常用户零开销',
+      open: true,
+      items: [
+        {
+          kind: 'single',
+          key: 'MAX_SYNC_ITEMS',
+          label: '同步批条目上限',
+          type: 'number',
+          default: '256',
+          validate: 'int',
+          comment: '资源滥用防线（v1.6.0）：全部为处理途中同步检查，正常用户零开销；0 = 关闭该防线\n上限自洽不变量：MAX_ROUTES_PER_GROUP × MAX_ROUTE_INFO_BYTES 须 < MAX_MESSAGE_BYTES\n（不自洽时启动日志 warn，合法全量推送可能被出站硬闸丢弃）',
+          help: '单次路由同步批的条目上限，超出丢弃；0 = 关闭该防线。注意与下面两项的体积自洽（见注释）。',
+        },
+        {
+          kind: 'single',
+          key: 'MAX_ROUTE_INFO_BYTES',
+          label: '单条路由条目字节上限',
+          type: 'number',
+          default: '768',
+          validate: 'int',
+          comment: '单条 RoutePeerInfo 原始字节上限，超出丢弃该条（防巨型条目状态膨胀；官方典型条目 ~100-300B）',
+          help: '防巨型条目撑爆状态；官方典型条目约 100-300 B。',
+        },
+        {
+          kind: 'single',
+          key: 'MAX_ROUTES_PER_GROUP',
+          label: '每分组路由条目上限',
+          type: 'number',
+          default: '128',
+          validate: 'int',
+          comment: '每分组路由条目总数上限（transit/幽灵条目总量闸门，兼作出站全量推送体积上界）',
+          help: 'transit / 幽灵条目总量闸门，兼作出站全量推送的体积上界；与上一项相乘须小于 MAX_MESSAGE_BYTES。',
+        },
+        {
+          kind: 'single',
+          key: 'MAX_DIRECT_PEERS_REPORT',
+          label: 'PeerCenter 直连表上限',
+          type: 'number',
+          default: '64',
+          validate: 'int',
+          comment: 'PeerCenter 单上报者直连表条目上限，超出截断',
+          help: '单个上报者的直连表条目上限，超出截断（防请求放大）。',
+        },
+        {
+          kind: 'single',
+          key: 'FULL_RESYNC_COOLDOWN_MS',
+          label: '全量重推最小间隔（毫秒）',
+          type: 'number',
+          default: '1000',
+          validate: 'int',
+          comment: '全量重推最小间隔（毫秒）：会话重置 / GetGlobalPeerMap 全量响应共用，每连接',
+          help: '每条连接的全量重推最小间隔，防「重置即全量」被用来放大流量。',
+        },
+        {
+          kind: 'single',
+          key: 'MAX_NETWORK_NAME_BYTES',
+          label: '网络名长度上限（字节）',
+          type: 'number',
+          default: '128',
+          validate: 'int',
+          comment: '握手网络名长度上限（空名 / 超长名拒绝，close 4002）',
+          help: '空名 / 超长名的握手直接拒绝（close 4002）。',
+        },
+      ],
+    },
+
+    {
+      id: 'security',
+      title: '安全',
+      desc: '未知路径防护与服务端密钥校验',
+      open: true,
+      items: [
         {
           kind: 'single',
           key: 'TARPIT_UNKNOWN',
@@ -290,7 +372,7 @@ window.ETCF_CONFIG = {
             { value: '1', label: '1 — 挂起不响应（推荐）' },
             { value: '0', label: '0 — 恢复 404' },
           ],
-          comment: '未知路径 tar pit：非升级请求挂起不响应（不泄露指纹）；0 = 恢复 404',
+          comment: '未知路径 tar pit（v1.4.1）：非升级请求访问未知路径时挂起不响应\n（不返回 404，不泄露行为指纹，让扫描器空等）；EasyTier 客户端只走\nWS 升级，不受影响；0 = 关闭（恢复 404）',
           help: '让路径扫描器空等，不泄露行为指纹；EasyTier 客户端只走 WS 升级，不受影响。',
         },
         {
@@ -301,8 +383,7 @@ window.ETCF_CONFIG = {
           optional: true,
           default: '{"myteam":"s3cret!"}',
           validate: 'networkSecrets',
-          comment:
-            '可选：JSON 映射 {"网络名":"网络密钥"}，配置后服务端校验客户端摘要（SipHash-1-3）',
+          comment: '可选：JSON 映射 {"网络名":"网络密钥"}，配置后服务端校验客户端摘要（SipHash-1-3）',
           help: '配置后服务端以 SipHash-1-3 校验客户端摘要，密钥不匹配直接拒绝。不配置时任何持有正确 (网络名, 密钥) 的客户端都可接入。',
         },
       ],
@@ -313,6 +394,7 @@ window.ETCF_CONFIG = {
       title: '多房间分片（可选）',
       desc: '默认所有连接进同一个房间；需要物理隔离（如不同租户）时启用',
       open: false,
+      header: ['可选：DO 房间分片。默认单一房间 "global"；配置后可按 Header/Query 切分房间'],
       toggle: { id: 'rooms', label: '启用房间分片', scope: 'items' },
       items: [
         {
@@ -321,8 +403,8 @@ window.ETCF_CONFIG = {
           label: '默认房间 ID',
           type: 'text',
           default: 'global',
-          comment: '默认房间 ID（未匹配 Header/Query 分片规则时使用）',
-          help: '默认单一房间 "global"。',
+          comment: '',
+          help: '默认单一房间 "global"（wrangler.toml 未加注释，分节说明见组头）。',
         },
         {
           kind: 'single',
@@ -330,8 +412,8 @@ window.ETCF_CONFIG = {
           label: '按请求头分片',
           type: 'text',
           default: 'X-Room',
-          comment: '按请求头分片（如 X-Room: t1）',
-          help: '按请求头值切分房间。',
+          comment: '',
+          help: '按请求头值切分房间（wrangler.toml 未加注释）。',
         },
         {
           kind: 'single',
@@ -339,8 +421,8 @@ window.ETCF_CONFIG = {
           label: '按 URL 参数分片',
           type: 'text',
           default: 'room',
-          comment: '按 URL 查询参数分片（如 wss://et.example.com/?room=t1）',
-          help: '按 URL 查询参数切分房间。',
+          comment: '',
+          help: '按 URL 查询参数切分房间（wrangler.toml 未加注释）。',
         },
       ],
     },
@@ -348,8 +430,18 @@ window.ETCF_CONFIG = {
     {
       id: 'audit',
       title: 'KV 审计（记录 + 黑名单）',
-      desc: '六类事件记录 + 四类黑名单；KV 绑定可选，未绑定时优雅降级为仅 DO storage',
+      desc: '记录 + 黑名单；KV 绑定可选，未绑定时优雅降级为仅 DO storage',
       open: false,
+      header: [
+        '---------------------------------------------------------------------------',
+        'KV 审计（记录 + 黑名单）。需要先创建 KV namespace 并取消下方注释：',
+        '  npx wrangler kv namespace create AUDIT_KV',
+        '不配置 AUDIT_KV 绑定时功能优雅降级：记录/黑名单仅存 Durable Object storage。',
+        '---------------------------------------------------------------------------',
+        '每类信息只占一条 KV 键（记录 7 条 + 黑名单 4 条，共 11 条）：',
+        '  记录键   et-relay:rec:<groups|peers|routes|peercenter|sockets|digests|admin>',
+        '  黑名单键 et-relay:bl:<peer|group|digest|socket>',
+      ],
       toggle: { id: 'auditKv', label: '启用 AUDIT_KV 绑定', scope: 'kvBinding' },
       toggleHelp:
         '需要先创建 KV namespace（npx wrangler kv namespace create AUDIT_KV），把输出的 id 填入下方。不启用时功能降级为仅 DO storage，管理页功能不受影响。',
@@ -361,7 +453,7 @@ window.ETCF_CONFIG = {
           type: 'text',
           default: '',
           noEmit: true,
-          comment: 'AUDIT_KV 绑定 id（npx wrangler kv namespace create AUDIT_KV 输出）',
+          comment: '',
           help: '先运行 npx wrangler kv namespace create AUDIT_KV，把输出里的 id 填到这里。',
         },
         {
@@ -371,7 +463,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '600000',
           validate: 'int',
-          comment: 'KV 镜像最小间隔（毫秒）：事件先入内存 + DO storage，按此间隔节流写 KV',
+          comment: 'KV 镜像最小间隔（毫秒）：事件先入内存+DO storage，按此间隔节流写 KV。\n免费额度 1000 写/天：默认 10 分钟间隔下每键最多 144 写/天',
           help: '默认 10 分钟；免费额度 1000 写/天下每键理论最多 144 写/天。',
         },
         {
@@ -404,7 +496,7 @@ window.ETCF_CONFIG = {
             { value: '1', label: '1 — 记录登录与操作（推荐）' },
             { value: '0', label: '0 — 关闭' },
           ],
-          comment: '管理端审计硬开关：记录管理员登录（IP/时间）与操作，管理页不可关闭',
+          comment: '管理端审计硬开关：记录管理员登录（IP/时间）、操作、查看信息。\n这是硬设置 —— 管理页无法关闭 admin 类记录，也无法删除其内容',
           help: '硬设置——管理页无法关闭 admin 类记录，也无法删除其内容。',
         },
         {
@@ -414,8 +506,31 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '200',
           validate: 'int',
-          comment: '管理端审计记录上限（硬设置）',
-          help: '硬设置。',
+          comment: '',
+          help: '硬设置（wrangler.toml 未加注释）。',
+        },
+        {
+          kind: 'single',
+          key: 'AUDIT_IP_MASK',
+          label: '记录内 IP 打码',
+          type: 'select',
+          default: '0',
+          options: [
+            { value: '0', label: '0 — 关闭（默认，记录完整 IP）' },
+            { value: '1', label: '1 — 打码（IPv4 保留 /16、IPv6 前 4 组）' },
+          ],
+          comment: '审计数据最小化（v1.6.0，均可选）：\nAUDIT_IP_MASK = "1" 时记录内客户端 IP 打码（IPv4 保留 /16 如 1.2.x.x、IPv6 前 4 组），\n黑名单存储、踢人拉黑、边缘拦截仍使用完整 IP 不受影响；默认 0 = 关闭',
+          help: '只影响记录展示：黑名单存储、踢人拉黑、边缘拦截仍用完整 IP；旧记录不回填。',
+        },
+        {
+          kind: 'single',
+          key: 'AUDIT_RETENTION_DAYS',
+          label: '记录留存天数',
+          type: 'number',
+          default: '0',
+          validate: 'int',
+          comment: '记录留存天数：alarm 每小时清理一次过期运行记录（admin 硬审计豁免）；默认 0 = 不限',
+          help: '0 = 不限；清理后标记脏键，随下一轮 flush 同步 DO storage 与 KV 镜像。',
         },
         {
           kind: 'single',
@@ -424,7 +539,7 @@ window.ETCF_CONFIG = {
           type: 'number',
           default: '30000',
           validate: 'int',
-          comment: '边缘层 IP 黑名单 isolate 缓存（毫秒）：只延后拦截、绝不漏放；0 = 关闭',
+          comment: '边缘层 IP 黑名单缓存（毫秒）：isolate 内缓存 bl:socket 的 KV 读结果，\n重连风暴时 KV 读从每次连接 1 次降为每 TTL 1 次。只延后拦截、绝不漏放\n（缓存未命中照旧放行走 DO 权威检查）。0 = 关闭',
           help: '重连风暴时 KV 读从每次连接 1 次降为每 TTL 1 次；0 = 关闭。',
         },
       ],
@@ -435,6 +550,12 @@ window.ETCF_CONFIG = {
       title: '日志与监控管理端',
       desc: '生产环境默认全部禁用（不配置即 404，零攻击面）；启用时务必使用随机长路径 + 强 token',
       open: false,
+      header: [
+        '---------------------------------------------------------------------------',
+        '监控与管理端（生产环境默认全部禁用 —— 不配置即 404，零攻击面）',
+        '启用时务必使用随机长路径 + 强 token（两道防线），参考部署手册「监控与管理端」章节',
+        '---------------------------------------------------------------------------',
+      ],
       items: [
         {
           kind: 'single',
@@ -452,22 +573,11 @@ window.ETCF_CONFIG = {
           help: 'debug 会打印每个包的类型与路由，仅排障时开启。',
         },
         {
-          kind: 'single',
-          key: 'HEALTH_PATH',
-          label: '健康检查路径',
-          type: 'text',
-          optional: true,
-          default: '/health',
-          validate: 'path',
-          comment: '健康检查路径（默认 /health）。配置后原 /health 返回 404（防指纹，无需 token）',
-          help: '配置后仅该路径返回 {"ok":true}，原 /health 不再暴露（防指纹扫描，无需 token）。',
-        },
-        {
           kind: 'pair',
           id: 'metrics',
           label: '统计端点（METRICS）',
           optional: true,
-          comment: '统计端点：自定义安全路径 + token 双门禁（不配置完全禁用）',
+          comment: '',
           help: '与 METRICS_PATH 同时配置才启用（fail-closed）。生产建议只用 Bearer 头鉴权，?token= 会进入 URL 日志。',
           fields: [
             {
@@ -477,6 +587,7 @@ window.ETCF_CONFIG = {
               default: '/m-please-change-me',
               validate: 'path',
               placeholder: '/m-<openssl rand -hex 8>',
+              comment: '统计端点：自定义安全路径（不配置则 /metrics 完全禁用）',
             },
             {
               key: 'METRICS_TOKEN',
@@ -485,15 +596,27 @@ window.ETCF_CONFIG = {
               default: '',
               validate: 'token',
               placeholder: '长随机字符串',
+              comment: '统计端点 token（与 METRICS_PATH 同时配置才启用；支持 Bearer 头或 ?token= 参数）',
             },
           ],
+        },
+        {
+          kind: 'single',
+          key: 'HEALTH_PATH',
+          label: '健康检查路径',
+          type: 'text',
+          optional: true,
+          default: '/health',
+          validate: 'path',
+          comment: '健康检查路径（默认 /health）。配置后仅该路径返回 {"ok":true}，原 /health 返回 404（防指纹扫描，无需 token）',
+          help: '配置后仅该路径返回 {"ok":true}，原 /health 不再暴露（防指纹扫描，无需 token）。',
         },
         {
           kind: 'pair',
           id: 'admin',
           label: 'Web 管理端（ADMIN）',
           optional: true,
-          comment: 'Web 管理端：自定义安全路径 + token 双门禁（页面壳公开、数据 API 鉴权）',
+          comment: '',
           help: '与 ADMIN_TOKEN 同时配置才启用。敏感 token 生产建议用 npx wrangler secret put 注入而非写进 toml。',
           fields: [
             {
@@ -503,6 +626,7 @@ window.ETCF_CONFIG = {
               default: '/admin-please-change-me',
               validate: 'path',
               placeholder: '/console-<随机串>',
+              comment: 'Web 管理端路径（需与 ADMIN_TOKEN 同时配置才启用；页面壳公开、数据 API 鉴权）',
             },
             {
               key: 'ADMIN_TOKEN',
@@ -511,8 +635,64 @@ window.ETCF_CONFIG = {
               default: '',
               validate: 'token',
               placeholder: '另一个长随机字符串',
+              comment: '管理端 token（状态查看 / 踢出节点 / 删除分组）\n⚠️ 安全建议：token 属敏感信息，生产环境建议用\n  npx wrangler secret put ADMIN_TOKEN\n注入而非写在本文件明文（与 CF_API_TOKEN 同模式）；本文件可能随仓库/备份/截图外泄',
             },
           ],
+        },
+      ],
+    },
+
+    {
+      id: 'quota',
+      title: '额度观测与趋势（v1.6，可选）',
+      desc: '账号级真实请求数 + Analytics Engine 趋势；全部可选，不配置则管理页回退自观测估算',
+      open: false,
+      header: [
+        '---------------------------------------------------------------------------',
+        '账号级真实额度 + AE 趋势（v1.6，全部可选 —— 不配置则管理页回退自观测估算）',
+        '---------------------------------------------------------------------------',
+      ],
+      toggle: { id: 'aeBinding', label: '启用 Analytics Engine 绑定（趋势图）', scope: 'binding' },
+      toggleHelp:
+        '需账号先在 Dashboard 一次性开通 Analytics Engine（Workers & Pages → Analytics Engine → Enable，免费、无需绑卡）；未开通时 wrangler deploy 会报错 10089，整个部署失败（开通后重跑即可）。不启用时以注释形式保留，代码自动降级，其余功能不受影响。',
+      items: [
+        {
+          kind: 'single',
+          key: 'CF_ACCOUNT_ID',
+          label: 'Cloudflare 账号 ID',
+          type: 'text',
+          optional: true,
+          default: 'your-cloudflare-account-id',
+          validate: 'accountId',
+          comment: 'Cloudflare 账号 ID（Dashboard 右侧 / Workers 概览页可见，非敏感）',
+          help: 'Dashboard 右侧 / Workers 概览页可见，非敏感。配置后管理页额度卡切换为账号级真实请求数（GraphQL Analytics API，服务端缓存）。',
+        },
+        {
+          kind: 'note',
+          key: 'CF_API_TOKEN',
+          label: 'Cloudflare API Token（必须 secret 注入）',
+          comment: 'Cloudflare API Token：必须用 secret 注入，绝不写入本文件明文！\n  npx wrangler secret put CF_API_TOKEN\n  权限只给「Account Analytics: Read」（供 GraphQL 额度查询与 AE SQL 趋势查询共用），\n  可随时在 Dashboard 吊销。见部署手册「额度观测与趋势」章节',
+          help: '用 npx wrangler secret put CF_API_TOKEN 注入，绝不写入本文件明文。权限只给「Account Analytics: Read」（GraphQL 额度查询与 AE SQL 趋势查询共用），可随时在 Dashboard 吊销。',
+        },
+        {
+          kind: 'single',
+          key: 'CF_SCRIPT_NAME',
+          label: '查询的 Worker 脚本名',
+          type: 'text',
+          optional: true,
+          default: 'easytier-cf-relay',
+          comment: '查询的 Worker 脚本名（默认 easytier-cf-relay；改名部署时需同步）',
+          help: '默认与 Worker 同名；改名部署时需同步，否则额度查询查不到数据。',
+        },
+        {
+          kind: 'single',
+          key: 'AE_DATASET',
+          label: 'Analytics Engine 数据集名',
+          type: 'text',
+          default: 'easytier-cf-relay',
+          noEmit: true,
+          comment: '',
+          help: '绑定即自动建数据集，无需控制台操作；默认与 Worker 同名，改名部署时同步。趋势打点约 1,440 点/天，免费计划含 100,000 点/天，不占请求额度。',
         },
       ],
     },

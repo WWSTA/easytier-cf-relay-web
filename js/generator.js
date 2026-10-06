@@ -199,6 +199,13 @@
       }
       return null;
     },
+    accountId: function (v) {
+      if (!v.trim()) return { level: 'warn', msg: '为空时该模块不会启用' };
+      if (/your-cloudflare/i.test(v)) {
+        return { level: 'warn', msg: '请把占位符换成真实的 Cloudflare 账号 ID（Dashboard 右侧 / Workers 概览页可见）' };
+      }
+      return null;
+    },
     date: function (v) {
       var t = v.trim();
       // wrangler 要求补零的 ISO 日期格式 YYYY-MM-DD（如 2026-10-01）
@@ -261,6 +268,17 @@
         Number(state.values['MAX_MESSAGE_BYTES']) < 1500) {
       out['MAX_MESSAGE_BYTES'] = { level: 'warn', msg: '小于 EasyTier MTU 1380，可能丢弃正常数据包' };
     }
+    // 资源滥用防线自洽不变量：MAX_ROUTES_PER_GROUP × MAX_ROUTE_INFO_BYTES 须 < MAX_MESSAGE_BYTES
+    var routeCap = Number(state.values['MAX_ROUTES_PER_GROUP'] || 0);
+    var routeBytes = Number(state.values['MAX_ROUTE_INFO_BYTES'] || 0);
+    var maxMsgBytes = Number(state.values['MAX_MESSAGE_BYTES'] || 0);
+    if (routeCap && routeBytes && maxMsgBytes && routeCap * routeBytes >= maxMsgBytes) {
+      out['MAX_ROUTES_PER_GROUP'] = {
+        level: 'warn',
+        msg: '不自洽：' + routeCap + ' × ' + routeBytes + ' ≥ MAX_MESSAGE_BYTES（' + maxMsgBytes +
+          '），合法全量推送可能被出站硬闸丢弃（服务端启动日志也会 warn）',
+      };
+    }
     if (state.enabled['auditKv'] && !(state.values['AUDIT_KV_ID'] || '').trim()) {
       out['AUDIT_KV_ID'] = { level: 'warn', msg: '未填写 id：部署前需运行 wrangler kv namespace create AUDIT_KV 补全' };
     }
@@ -311,24 +329,40 @@
     L.push('');
     L.push('[vars]');
 
+    /** 注释逐字对应 wrangler.toml：可多行（\n 分行），空串不输出 */
+    function pushComment(text) {
+      if (text === undefined || text === null || text === '') return;
+      String(text).split('\n').forEach(function (line) {
+        L.push('# ' + line);
+      });
+    }
+
     CONFIG.groups.forEach(function (g) {
+      // 组级 header = wrangler.toml 里的分节注释块（KV 审计 / 监控与管理端 / 额度观测等）
+      (g.header || []).forEach(function (line) { L.push('# ' + line); });
       var groupDisabled = g.toggle && g.toggle.scope === 'items' && !state.enabled[g.toggle.id];
-      if (groupDisabled) {
+      if (groupDisabled && !(g.header || []).length) {
         L.push('# 可选：' + g.title + '。' + '默认未启用，配置后生效');
       }
       (g.items || []).forEach(function (item) {
+        if (item.kind === 'note') {
+          // 纯说明项：只输出注释块（如 CF_API_TOKEN，只允许 secret 注入）
+          pushComment(item.comment);
+          return;
+        }
         if (item.kind === 'single') {
-          if (item.noEmit) return; // 仅用于 KV 绑定，不进 [vars]
+          if (item.noEmit) return; // 仅用于绑定 id / AE 数据集，不进 [vars]
           var enabled;
           if (item.optional) enabled = !!state.enabled[item.key] && !groupDisabled;
           else enabled = !groupDisabled;
-          L.push('# ' + item.comment);
+          pushComment(item.comment);
           L.push((enabled ? '' : '# ') + item.key + ' = ' + q(v[item.key] || ''));
         } else if (item.kind === 'pair') {
           var on = !!state.enabled[item.id];
-          L.push('# ' + item.comment);
+          pushComment(item.comment);
           item.fields.forEach(function (f) {
             var val = v[f.key] || '';
+            pushComment(f.comment);
             L.push((on ? '' : '# ') + f.key + ' = ' + q(val));
           });
         }
@@ -357,6 +391,28 @@
       L.push('# id = "<你的 KV namespace id>"');
     }
 
+    /* ---- Analytics Engine 绑定（v1.6 趋势打点，可选） ---- */
+    L.push('');
+    [
+      'Analytics Engine 绑定（v1.6：趋势打点，免费计划含 100,000 数据点/天；',
+      '本方案每分钟 1 点 ≈ 1,440/天）。绑定即自动建数据集，无需额外创建步骤',
+      '⚠️ 注意：本绑定要求账号先在 Dashboard 一次性开通 Analytics Engine',
+      '  （Workers & Pages → Analytics Engine → Enable，免费、无需绑卡）；',
+      '  未开通时 `wrangler deploy` 会报错 10089「You need to enable Analytics',
+      '  Engine」，整个部署失败（线上不受影响，开通后重跑即可）。',
+      '打开 https://dash.cloudflare.com/{CF_ACCOUNT_ID}/workers/analytics-engine',
+    ].forEach(function (line) { L.push('# ' + line); });
+    if (state.enabled['aeBinding']) {
+      L.push('[[analytics_engine_datasets]]');
+      L.push('binding = "AE"');
+      L.push('dataset = ' + q((v['AE_DATASET'] || '').trim() || 'easytier-cf-relay'));
+    } else {
+      L.push('# 不需要趋势图可注释掉下面 3 行——代码自动降级，其余功能不受影响。');
+      L.push('# [[analytics_engine_datasets]]');
+      L.push('# binding = "AE"');
+      L.push('# dataset = ' + q((v['AE_DATASET'] || '').trim() || 'easytier-cf-relay'));
+    }
+
     /* ---- migrations ---- */
     L.push('');
     L.push('[[migrations]]');
@@ -366,7 +422,7 @@
     L.push('# 说明：');
     L.push('# - 使用 new_sqlite_classes（存储后端为 SQLite，免费额度内即支持 Hibernation API）');
     L.push('# - 若已有旧部署（new_classes），不要重复添加迁移，参考部署手册「迁移」章节');
-    L.push('# - 生产敏感变量（METRICS_TOKEN / ADMIN_TOKEN 等）建议用 npx wrangler secret put 注入');
+    L.push('# - 生产敏感变量（METRICS_TOKEN / ADMIN_TOKEN / CF_API_TOKEN 等）建议用 npx wrangler secret put 注入');
     L.push('');
 
     return L.join('\n');
@@ -528,6 +584,15 @@
             inputHtml(item, item.key, state.values[item.key] || '', item.placeholder) +
             '<p class="gen-help">' + esc(item.help) + '</p>' +
             '<p class="gen-msg" data-msg-for="' + item.key + '"></p>' +
+            '</div>';
+        } else if (item.kind === 'note') {
+          // 纯说明项（无输入框）：TOML 里只输出注释块，如 CF_API_TOKEN
+          html +=
+            '<div class="gen-item gen-note" data-key="' + item.key + '">' +
+            '<div class="gen-item-head">' +
+            '<span class="gen-label"><code>' + item.key + '</code><span>' + esc(item.label) + '</span></span>' +
+            '</div>' +
+            '<p class="gen-help">' + esc(item.help) + '</p>' +
             '</div>';
         } else if (item.kind === 'pair') {
           var pairOn = !!state.enabled[item.id];

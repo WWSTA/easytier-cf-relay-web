@@ -62,7 +62,8 @@
       <p class="mb-0">
         <strong>敏感 token 不建议写进 wrangler.toml</strong>：生产环境请用
         <code>npx wrangler secret put METRICS_TOKEN</code> / <code>npx wrangler secret put ADMIN_TOKEN</code> 注入
-        （资源名相同则 secret 优先）。生成器里填写的 token 仅在生成配置时使用，不会上传到任何服务器。
+        （资源名相同则 secret 优先）。<code>CF_API_TOKEN</code>（v1.6 额度观测）只允许 secret 注入，
+        生成器仅保留其注释说明。生成器里填写的 token 仅在生成配置时使用，不会上传到任何服务器。
       </p>
     </div>
   </section>

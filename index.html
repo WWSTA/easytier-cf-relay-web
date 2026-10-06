@@ -59,7 +59,7 @@
       </p>
 
       <div class="badges">
-        <span class="badge badge-blue"><span class="dot"></span>v1.5.0</span>
+        <span class="badge badge-blue"><span class="dot"></span>v1.6.0</span>
         <span class="badge badge-green"><span class="dot"></span>MIT License</span>
         <span class="badge badge-purple"><span class="dot"></span>Cloudflare Workers + Durable Objects</span>
         <span class="badge badge-green"><span class="dot"></span>easytier-core 2.6.4 官方客户端实测兼容</span>
@@ -162,7 +162,7 @@
         <article class="card feature-card">
           <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></span>
           <h3>KV 审计记录</h3>
-          <p>六类事件记录进 Workers KV（每类只占一条键，全生命周期共 11 条），支持「全部」跨类型合并查询；管理员登录与操作为硬审计。</p>
+          <p>六类事件记录进 Workers KV（每类只占一条键，全生命周期共 11 条），支持「全部」跨类型合并查询；管理员登录与操作为硬审计。v1.6 起可选 IP 打码（<code>AUDIT_IP_MASK</code>）与按天留存清理（<code>AUDIT_RETENTION_DAYS</code>）。</p>
           <a class="feature-more" href="technical.html#9-kv-审计与管理端黑名单">KV 审计设计 →</a>
         </article>
 
@@ -179,11 +179,25 @@
           <p>Hibernation + alarm 自适应排程，典型小网络日请求量约为限额的 5%，空房间低至 288 请求/天，空闲成本趋零。</p>
           <a class="feature-more" href="deploy.html#7-成本与额度">成本与额度 →</a>
         </article>
+
+        <article class="card feature-card">
+          <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M4 16l4.5-4.5 3 3L16 9l4 4"/></svg></span>
+          <h3>观测升级（v1.6）</h3>
+          <p><code>/metrics?format=prometheus</code> 输出 25 个 <code>easytier_</code> 指标可接 Grafana；可选配置账号级真实额度（GraphQL，token 只在服务端）；绑定 Analytics Engine 后总览新增近 24h / 7 天趋势折线（纯 SVG，零图表库）。</p>
+          <a class="feature-more" href="deploy.html#581-额度观测与趋势v16可选">额度观测与趋势 →</a>
+        </article>
+
+        <article class="card feature-card">
+          <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M12 8v4"/><path d="M12 15h.01"/></svg></span>
+          <h3>资源滥用防线（v1.6）</h3>
+          <p>路由洪泛 / 请求放大 / 出站与状态总量多维上限（全部 env 可调，0 = 关闭），均为处理途中同步检查——正常用户免费额度零开销；管理端新增防线计数与摘要抢占嫌疑记录（含来源 IP）。</p>
+          <a class="feature-more" href="technical.html#61-资源滥用防线v160">防线设计 →</a>
+        </article>
       </div>
 
       <figure class="image-frame" style="margin-top: 24px">
         <img src="p.png" alt="Web 管理端「总览」页截图（深色主题）">
-        <figcaption>Web 管理端「总览」页（深色主题）：运行参数、事前限流计数、额度估算与官方 easytier-cli 命令对照。</figcaption>
+        <figcaption>Web 管理端「总览」页（v1.6）：趋势折线（Analytics Engine）、账号级真实额度、运行参数与官方 easytier-cli 命令对照。</figcaption>
       </figure>
     </div>
   </section>
@@ -288,7 +302,7 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
 
         <div class="arch-node arch-accent">
           <div class="arch-title">Cloudflare Edge · Worker 入口（src/index.js）</div>
-          <div class="arch-desc">健康检查 · 自定义 /metrics 与管理端（token 双门禁）· 边缘层 IP 黑名单拦截（不唤醒 DO）· 按 URL / Header / Query 选择房间</div>
+          <div class="arch-desc">健康检查 · 自定义 /metrics 与管理端（token 双门禁）· Prometheus 文本指标（v1.6）· 边缘层 IP 黑名单拦截（不唤醒 DO）· 按 URL / Header / Query 选择房间</div>
         </div>
 
         <div class="arch-arrow">
@@ -329,9 +343,9 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
             <tr><td>请求</td><td>100,000 / 天</td><td>含 WS 连接建立、入站 WS 消息（20:1 折算）、alarm 唤醒</td></tr>
             <tr><td>Duration</td><td>13,000 GB-s / 天</td><td>Hibernation 状态不计费——全用 Hibernation API，空闲时成本趋近零</td></tr>
             <tr><td>存储</td><td>5 GB / 账户</td><td>仅存路由元数据（KB 级）</td></tr>
-            <tr><td>KV 写</td><td>1,000 / 天</td><td>启用 KV 审计后按 10 分钟节流镜像，每键理论最大 144 写/天，典型数十写/天</td></tr>
-            <tr><td>KV 读</td><td>100,000 / 天</td><td>冷启动恢复 + WS 升级边缘黑名单检查（30s isolate 缓存）</td></tr>
-            <tr><td>单 DO 吞吐</td><td>~1,000 req/s（软限制）</td><td>单房间默认上限内远达不到；更大规模用房间分片</td></tr>
+            <tr><td>KV 写</td><td>1,000 / 天</td><td>启用 KV 审计后：事件按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）节流镜像，每键理论最大 144 写/天；拒绝/查看事件不产生写入</td></tr>
+            <tr><td>KV 读</td><td>100,000 / 天</td><td>冷启动且 DO storage 为空时读取（每键一次）+ WS 升级的边缘黑名单检查（v1.4.0 起 isolate 缓存，默认每 30s 至多 1 次读）</td></tr>
+            <tr><td>单 DO 吞吐</td><td>~1,000 req/s（软限制）</td><td>单房间 64 peer 远达不到</td></tr>
           </tbody>
         </table>
       </div>
@@ -356,12 +370,14 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
             <tr><th>限制</th><th>说明</th><th>影响</th></tr>
           </thead>
           <tbody>
-            <tr><td>不支持 secure mode（Noise）</td><td>v2.6.0+ 的可选加密握手；收到 NoiseHandshakeMsg 包会关闭连接（4003）</td><td>客户端使用默认（非 secure）模式即可</td></tr>
-            <tr><td>不执行 P2P 打洞</td><td>Workers 无 UDP 出口；打洞由客户端之间直接进行，本节点提供 rendezvous / 路由信息</td><td>双端均严格 NAT 时只能走中继</td></tr>
-            <tr><td>不做 KCP / QUIC 协议转换</td><td>KcpSrc / KcpDst / Quic* 包仅按 to_peer_id 转发</td><td>无（这些包本来就是端到端的）</td></tr>
+            <tr><td>不支持 secure mode（Noise）</td><td>v2.6.0+ 的可选加密握手。收到 NoiseHandshakeMsg 包会关闭连接（4003）</td><td>客户端使用默认（非 secure）模式即可</td></tr>
+            <tr><td>不执行 P2P 打洞</td><td>Workers 无 UDP 出口。打洞由客户端之间直接进行（本节点提供 rendezvous/路由信息）</td><td>双端均严格 NAT 时只能走中继</td></tr>
+            <tr><td>不做 KCP / QUIC 协议转换</td><td>KcpSrc/KcpDst/Quic* 包仅按 to_peer_id 转发</td><td>无（这些包本来就是端到端的）</td></tr>
             <tr><td>不压缩 RPC</td><td>出站 algo=None</td><td>微量带宽差异，无功能影响</td></tr>
-            <tr><td>单房间串行（DO 单线程）</td><td>单 DO 软限制 ~1000 req/s；更大规模需房间分片</td><td>默认 peer 上限内无感知</td></tr>
-            <tr><td>IPv6 子网信息</td><td>RoutePeerInfo 原样透传，但服务端自身不宣告 v6</td><td>客户端间 v6 组网不受影响</td></tr>
+            <tr><td>单房间串行（DO 单线程）</td><td>单 DO 软限制 ~1000 req/s；更大规模需房间分片（ROOM_HEADER/QUERY）</td><td>64 peer 默认上限内无感知</td></tr>
+            <tr><td>同组内 peerId 可被顶替</td><td>EasyTier 协议固有语义（重连顶替），组内成员互信（共享网络密钥）</td><td>顶替路径状态一致性已修复（先清后注）；组间风险由分组隔离与 <code>NETWORK_SECRETS</code> 防守</td></tr>
+            <tr><td>未配置 <code>NETWORK_SECRETS</code> 的抢占风险</td><td>先到者注册摘要后，不同密钥的后来者被拒（STRICT_DIGEST 隔离语义的另一面）</td><td><code>squat-suspect</code> 审计可见攻击 IP；删除分组/摘要注册可解锁；配置 <code>NETWORK_SECRETS</code> 即免疫（注册表自愈）</td></tr>
+            <tr><td>IPv6 子网信息</td><td>RoutePeerInfo 原样透传（raw 字节路径保留官方字段），但服务端自身不宣告 v6</td><td>客户端间 v6 组网不受影响</td></tr>
           </tbody>
         </table>
       </div>
@@ -388,21 +404,21 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
         <a class="card card-link feature-card" href="deploy.html">
           <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 10.5L12 15l4.5-4.5"/><path d="M4 19h16"/></svg></span>
           <h3>部署手册</h3>
-          <p>5 分钟部署、全部配置项、域名绑定、客户端接入、成本额度、运维与 FAQ（636 行全文）。</p>
+          <p>5 分钟部署、全部配置项、域名绑定、客户端接入、额度观测与趋势、成本额度、运维与 FAQ（719 行全文）。</p>
           <span class="feature-more">阅读部署手册 →</span>
         </a>
 
         <a class="card card-link feature-card" href="technical.html">
           <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4L4 12l5 8"/><path d="M15 4l5 8-5 8"/></svg></span>
           <h3>技术文档</h3>
-          <p>协议实现详解、幽灵节点六重防线、Hibernation 成本设计、KV 审计与黑名单、与官方对比（519 行全文）。</p>
+          <p>协议实现详解、幽灵节点六重防线、资源滥用防线、额度观测与趋势、KV 审计与黑名单、与官方对比（597 行全文）。</p>
           <span class="feature-more">阅读技术文档 →</span>
         </a>
 
         <a class="card card-link feature-card" href="changelog.html">
           <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
           <h3>更新日志</h3>
-          <p>v1.0.0 → v1.5.0 各版本变更明细与花费记录（Keep a Changelog 格式，379 行全文）。</p>
+          <p>v1.0.0 → v1.6.0 各版本变更明细与花费记录（Keep a Changelog 格式，450 行全文）。</p>
           <span class="feature-more">查看更新日志 →</span>
         </a>
       </div>
@@ -472,7 +488,7 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
       </div>
     </div>
     <div class="footer-bottom">
-      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由国产大模型辅助开发（明细见更新日志）</span>
       <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
     </div>
   </div>

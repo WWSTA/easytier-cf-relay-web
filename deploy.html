@@ -63,6 +63,7 @@
           <li class="toc-h3"><a href="#56-kv-审计记录-黑名单">5.6 KV 审计（记录 + 黑名单）</a></li>
           <li class="toc-h3"><a href="#57-日志">5.7 日志</a></li>
           <li class="toc-h3"><a href="#58-监控与管理端">5.8 监控与管理端</a></li>
+          <li class="toc-h3"><a href="#581-额度观测与趋势v16可选">5.8.1 额度观测与趋势（v1.6，可选）</a></li>
           <li class="toc-h2"><a href="#6-客户端接入">6. 客户端接入</a></li>
           <li class="toc-h3"><a href="#61-linux-macoseasytier-core-cli">6.1 Linux / macOS（easytier-core CLI）</a></li>
           <li class="toc-h3"><a href="#62-windows-gui-macos-gui-手机端">6.2 Windows GUI / macOS GUI / 手机端</a></li>
@@ -302,6 +303,36 @@ curl http://127.0.0.1:8787/health
 <td>单条 WS 消息上限（128 KiB，远大于 EasyTier MTU 1380 与路由同步包）</td>
 </tr>
 <tr>
+<td><code>MAX_SYNC_ITEMS</code></td>
+<td><code>256</code></td>
+<td>资源滥用防线：单帧路由同步条目数上限，超出整帧拒绝（4009）；<code>0</code> = 关闭。默认 = 房间上限 64 的 4× 余量</td>
+</tr>
+<tr>
+<td><code>MAX_ROUTE_INFO_BYTES</code></td>
+<td><code>768</code></td>
+<td>单条 RoutePeerInfo 原始字节上限，超出丢弃该条（防巨型条目类状态膨胀）；<code>0</code> = 关闭</td>
+</tr>
+<tr>
+<td><code>MAX_ROUTES_PER_GROUP</code></td>
+<td><code>128</code></td>
+<td>每分组路由条目总数上限（transit/幽灵总量闸门，兼作出站全量推送体积上界）；<code>0</code> = 关闭。与 <code>MAX_ROUTE_INFO_BYTES</code> 乘积须 &lt; <code>MAX_MESSAGE_BYTES</code>（不自洽时启动日志 warn）</td>
+</tr>
+<tr>
+<td><code>MAX_DIRECT_PEERS_REPORT</code></td>
+<td><code>64</code></td>
+<td>PeerCenter 单上报者直连表条目上限，超出截断；<code>0</code> = 关闭</td>
+</tr>
+<tr>
+<td><code>FULL_RESYNC_COOLDOWN_MS</code></td>
+<td><code>1000</code></td>
+<td>全量重推最小间隔（会话重置 / GetGlobalPeerMap 全量响应共用，每连接）；<code>0</code> = 关闭</td>
+</tr>
+<tr>
+<td><code>MAX_NETWORK_NAME_BYTES</code></td>
+<td><code>128</code></td>
+<td>握手网络名长度上限（空名/超长名拒绝，close 4002）；<code>0</code> = 关闭</td>
+</tr>
+<tr>
 <td><code>HANDSHAKE_TIMEOUT_MS</code></td>
 <td><code>15000</code></td>
 <td>连接后未完成握手的清理超时（防幽灵连接第一道防线）</td>
@@ -439,6 +470,16 @@ npx wrangler deploy
 <td><code>30000</code></td>
 <td>边缘层 IP 黑名单缓存（v1.4.0）：isolate 内缓存 <code>bl:socket</code> 的 KV 读结果，重连风暴时 KV 读从每次连接 1 次降为每 TTL 1 次。<strong>只延后拦截、绝不漏放</strong>（缓存未命中照旧放行走 DO 权威检查）；<code>0</code> = 关闭</td>
 </tr>
+<tr>
+<td><code>AUDIT_IP_MASK</code></td>
+<td><code>0</code></td>
+<td>审计 IP 打码（v1.6.0）：<code>1</code> 时<strong>记录</strong>中的客户端 IP 打码——IPv4 保留 /16 前缀（<code>1.2.x.x</code>）、IPv6 保留前 4 组。仅影响记录展示（旧记录不回填）；黑名单存储、踢人拉黑、边缘拦截仍使用完整 IP，功能不受影响</td>
+</tr>
+<tr>
+<td><code>AUDIT_RETENTION_DAYS</code></td>
+<td><code>0</code></td>
+<td>记录留存天数（v1.6.0）：<code>0</code> = 不限（默认，仅受各类条数上限约束）；配置 N 后 alarm 每小时清理一次超过 N 天的运行记录（admin 硬审计豁免），清理数写入日志并同步 KV</td>
+</tr>
 </tbody></table></div>
 <p>KV 键布局与写入策略详见技术文档 §9。免费额度核算：
 KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 144 写/天，
@@ -522,7 +563,7 @@ KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 14
 <tr>
 <td><code>ADMIN_TOKEN</code></td>
 <td>（空）</td>
-<td>管理端 token（状态查看 / 踢出节点 / 删除分组）</td>
+<td>管理端 token（状态查看 / 踢出节点 / 删除分组）。<strong>安全审计建议</strong>：token 属敏感信息，生产建议 <code>npx wrangler secret put ADMIN_TOKEN</code> 注入而非写进 toml 明文（与 <code>METRICS_TOKEN</code>/<code>CF_API_TOKEN</code> 同模式）</td>
 </tr>
 </tbody></table></div>
 <div class="code-block" data-lang="toml"><pre><code class="language-toml">[vars]
@@ -541,7 +582,92 @@ ADMIN_TOKEN = &quot;另一个长随机字符串&quot;
 <li>管理端页面壳本身无数据（可公开访问），所有数据 API 均需 token；</li>
 <li><strong>token 属于敏感信息</strong>：生产建议用 <code>npx wrangler secret put METRICS_TOKEN</code> 注入而非写进 toml；</li>
 <li>管理页自动刷新间隔 30s（v1.4.0 起；且页面不可见时自动暂停），长开页面的请求量
-约 2.9k/天，对免费额度（100k/天）占用很小，不需要时可关闭自动刷新。</li>
+约 2.9k/天，对免费额度（100k/天）占用很小，不需要时可关闭自动刷新；
+v1.6.0 起「额度观测 / 趋势」在服务端报告未配置 CF 凭证后，前端会记住状态并
+跳过后续轮询（卡内提供「重新检测」入口），避免空转请求。</li>
+</ul>
+<p><strong>Prometheus 文本输出（v1.6.0）</strong>：启用 <code>/metrics</code> 后，追加 <code>?format=prometheus</code>
+即输出 Prometheus text exposition format（<code>text/plain; version=0.0.4</code>），25 个
+<code>easytier_</code> 命名空间指标（无 label 防高基数）：<code>easytier_peers</code> / <code>easytier_groups</code> /
+<code>easytier_uptime_seconds</code> / <code>easytier_sockets</code> / <code>easytier_sockets_handshaked</code>（gauge）
+与 <code>easytier_msgs_in_total</code> / <code>easytier_msgs_out_total</code> /
+<code>easytier_bytes_in_total</code> / <code>easytier_bytes_out_total</code> / <code>easytier_forwards_total</code> /
+<code>easytier_conns_total</code> / <code>easytier_errors_total</code> / <code>easytier_forgeries_total</code> /
+<code>easytier_blacklist_rejected_total</code> / <code>easytier_ip_limited_total</code> /
+<code>easytier_rate_limited_total</code> / <code>easytier_group_limited_total</code> /
+<code>easytier_alarms_total</code>（counter）。抓取示例（自托管 Prometheus）：</p>
+<div class="code-block" data-lang="yaml"><pre><code class="language-yaml">scrape_configs:
+  - job_name: easytier-relay
+    scrape_interval: 60s
+    metrics_path: /m-a1b2c3d4        # 你的 METRICS_PATH
+    params:
+      format: [prometheus]
+    authorization:
+      credentials: &quot;&lt;METRICS_TOKEN&gt;&quot;
+    static_configs:
+      - targets: [&quot;&lt;你的域名&gt;&quot;]
+</code></pre></div>
+<p>Grafana 可用 Prometheus 数据源直接画 <code>easytier_peers</code>、
+<code>rate(easytier_msgs_in_total[5m])</code> 等面板；拨测平台可继续用 JSON 端点或
+<code>/health</code>。注意 counter 随 DO 重启归零（免费计划 DO 周期休眠回收），告警
+建议基于 <code>rate()</code> / <code>increase()</code> 而非绝对值。</p>
+<h3 id="581-额度观测与趋势v16可选" class="heading-anchor"><a class="anchor" href="#581-额度观测与趋势v16可选" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>5.8.1 额度观测与趋势（v1.6，可选）</h3>
+<p>未配置时总览「额度观测」卡为自观测估算口径，行为与 v1.5 一致。配置下列项后
+升级为<strong>账号级真实数据</strong>（全部可选，逐项独立生效）：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>项</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>CF_ACCOUNT_ID</code></td>
+<td>vars（非敏感）</td>
+<td>Cloudflare 账号 ID（Dashboard 首页右侧 / Workers 概览页可见）。真实额度与 AE 趋势查询共用</td>
+</tr>
+<tr>
+<td><code>CF_API_TOKEN</code></td>
+<td><strong>secret</strong></td>
+<td>Cloudflare API Token，<strong>必须</strong> <code>npx wrangler secret put CF_API_TOKEN</code> 注入，绝不写入 toml 明文。权限只给 <strong>Account → Account Analytics → Read</strong>（只读，可随时在 Dashboard → My Profile → API Tokens 吊销）。供 GraphQL 额度查询与 AE SQL 趋势查询共用</td>
+</tr>
+<tr>
+<td><code>CF_SCRIPT_NAME</code></td>
+<td>vars（可选）</td>
+<td>被查询的 Worker 脚本名，默认 <code>easytier-cf-relay</code>；用其它名字部署时需同步</td>
+</tr>
+<tr>
+<td><code>AE</code> 绑定</td>
+<td>wrangler.toml</td>
+<td>Analytics Engine 绑定（趋势打点）。绑定即自动建数据集，无需控制台操作</td>
+</tr>
+</tbody></table></div>
+<div class="code-block" data-lang="toml"><pre><code class="language-toml">[vars]
+CF_ACCOUNT_ID = &quot;你的账号 ID&quot;
+CF_SCRIPT_NAME = &quot;easytier-cf-relay&quot;
+
+[[analytics_engine_datasets]]
+binding = &quot;AE&quot;
+dataset = &quot;easytier_relay&quot;
+
+# Token 一律 secret 注入（不要写在这里）：
+#   npx wrangler secret put CF_API_TOKEN
+</code></pre></div>
+<p>行为说明：</p>
+<ul>
+<li><strong>真实额度</strong>（管理端 <code>/api/quota</code>）：服务端出站调 GraphQL Analytics API
+统计当日 UTC 窗口的 <code>workersInvocationsAdaptive</code> 请求数（出站调用不占
+100k 入站额度）；结果缓存 5 分钟（失败缓存 1 分钟），管理页 30s 自动刷新
+不会打爆 API；查询失败自动回退自观测估算并在卡片标注原因。Token 只在
+服务端使用，浏览器 / 日志 / 审计中不出现。</li>
+<li><strong>趋势图</strong>（管理端 <code>/api/trends</code>）：DO 每 ≥60s 向 AE 写一个计数快照
+（约 1,440 点/天，免费计划含 100,000 点/天，打点不占请求额度）；查询走
+AE SQL API，24h 窗口 15 分钟一桶、7d 窗口 1 小时一桶，SQL 分桶查询失败
+自动回退原始点服务端聚合。未绑定 AE 时打点静默跳过、趋势卡提示未启用。</li>
+<li>GraphQL 免费计划可用性已于 v1.6 立项前复核（账号级 Workers 数据集可用；
+zone 级站点分析受限与本功能无关）；如官方 API 变更导致查询失败，功能
+自动降级为估算口径，不影响其它功能。</li>
 </ul>
 
 </section>
@@ -867,7 +993,11 @@ new_sqlite_classes = [&quot;RelayRoom&quot;]  # 追加：切换到 SQLite 后端
 <code>counters.bytesIn/bytesOut/forwards</code> 即为控制面+数据面的转发统计；或用 Web 管理端总览页。</p>
 <p><strong>Q8：同名网络被恶意抢占（digest mismatch）怎么办？</strong>
 已配置 <code>NETWORK_SECRETS</code> 的网络不受影响（服务端以正确密钥摘要为准，注册表自愈）。
-未配置的网络被抢占时，用管理端<strong>删除该分组</strong>即可解除注册，随后正常客户端可重新接入。</p>
+未配置的网络被抢占时，用管理端<strong>删除该分组</strong>即可解除注册，随后正常客户端可重新接入。
+v1.6.0 起，此类握手被拒会写入 <code>squat-suspect</code> 审计事件（含攻击源 IP，
+按网络名+IP 10 分钟去重）——「记录查询 → 摘要注册」页可见抢占者并可拉黑其 IP；
+总览页「摘要抢占嫌疑」计数持续偏高即说明有人在尝试堵门。<strong>加固建议</strong>：公开部署
+强烈建议配置 <code>NETWORK_SECRETS</code>（服务端密钥校验，抢占直接失效）。</p>
 <p><strong>Q10：踢出/删除的节点或网络重连不上？</strong>
 这是黑名单在生效：踢出节点 / 删除分组 / 删除摘要注册 / 断开连接会把操作对象
 （PeerId / 网络名 / IP）加入对应类别黑名单并拦截后续接入。

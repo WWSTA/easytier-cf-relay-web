@@ -64,7 +64,9 @@
           <li class="toc-h3 toc-extended"><a href="#47-心跳对标-pingpong-liveness-echo">4.7 心跳（对标 ping/pong + liveness-echo）</a></li>
           <li class="toc-h2"><a href="#5-纯-p2p-模式">5. 纯 P2P 模式</a></li>
           <li class="toc-h2"><a href="#6-幽灵节点六重防线">6. 幽灵节点六重防线</a></li>
+          <li class="toc-h3"><a href="#61-资源滥用防线v160">6.1 资源滥用防线（v1.6.0）</a></li>
           <li class="toc-h2"><a href="#7-websocket-hibernation-与成本设计">7. WebSocket Hibernation 与成本设计</a></li>
+          <li class="toc-h3"><a href="#71-额度观测与趋势v160">7.1 额度观测与趋势（v1.6.0）</a></li>
           <li class="toc-h2 toc-extended"><a href="#8-状态持久化">8. 状态持久化</a></li>
           <li class="toc-h2 toc-extended"><a href="#9-kv-审计与管理端黑名单">9. KV 审计与管理端黑名单</a></li>
           <li class="toc-h3 toc-extended"><a href="#91-键值布局每类信息只占一条-kv-键">9.1 键值布局（每类信息只占一条 KV 键）</a></li>
@@ -72,6 +74,7 @@
           <li class="toc-h3 toc-extended"><a href="#93-硬设置与软设置">9.3 硬设置与软设置</a></li>
           <li class="toc-h3 toc-extended"><a href="#94-黑名单拦截双层免费额度优化">9.4 黑名单拦截（双层，免费额度优化）</a></li>
           <li class="toc-h3 toc-extended"><a href="#95-事件来源挂钩点">9.5 事件来源（挂钩点）</a></li>
+          <li class="toc-h3 toc-extended"><a href="#96-审计数据最小化v160">9.6 审计数据最小化（v1.6.0）</a></li>
           <li class="toc-h2"><a href="#10-第三方项目问题与本实现的修复">10. 第三方项目问题与本实现的修复</a></li>
           <li class="toc-h2"><a href="#11-测试体系与实测结果">11. 测试体系与实测结果</a></li>
           <li class="toc-h3"><a href="#111-静态检查">11.1 静态检查</a></li>
@@ -308,6 +311,12 @@
 <td>✅</td>
 </tr>
 </tbody></table></div>
+<p>| 结构化日志（debug~error 四级） | ✅ |
+| Prometheus 文本输出（<code>/metrics?format=prometheus</code>，16 个 <code>easytier_</code> 指标，v1.6.0） | ✅ |
+| 账号级真实额度（GraphQL Analytics API，token 仅服务端使用，缓存 5 分钟，v1.6.0） | ✅ |
+| Analytics Engine 趋势打点 + 管理页 SVG 趋势图（未绑定 AE 静默降级，v1.6.0） | ✅ |
+| 审计数据最小化（<code>AUDIT_IP_MASK</code> 打码 / <code>AUDIT_RETENTION_DAYS</code> 留存清理，v1.6.0） | ✅ |
+| 资源滥用防线（帧条目/条目字节/分组总量/直连表上限 + 出站硬闸 + 双冷却 + 抢占可观测，v1.6.0，见 §6.1） | ✅ |</p>
 <h3 id="24-验证" class="heading-anchor"><a class="anchor" href="#24-验证" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>2.4 验证</h3>
 <ul>
 <li>静态检查：<code>node --check</code> 全部源文件语法通过；<code>wrangler deploy --dry-run</code> 构建通过；</li>
@@ -569,6 +578,65 @@ ServiceKey 查不到服务、SyncRouteInfo 全部超时。本实现入站兼容�
 与 <code>peer_ospf_route.rs</code> 的来源可信度模型。本实现在此基础上补充了 reporter 追踪
 （官方无此问题——官方服务端是 OSPF 全节点，条目天然有连接背书）。</p>
 </blockquote>
+<h3 id="61-资源滥用防线v160" class="heading-anchor"><a class="anchor" href="#61-资源滥用防线v160" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.1 资源滥用防线（v1.6.0）</h3>
+<p>针对第三方动态审计确认的滥用向量（洪泛/放大/状态膨胀/顶替缺陷），在处理
+途中加同步检查。<strong>零额度开销原则</strong>：不新增请求路径、KV 键、定时器与打点
+频率，全部防线为 O(1) 内存检查；上限经 env 可配（0 = 关闭），默认值对
+合法客户端（房间 64 / 分组 32，见部署手册 §5.3）留数倍余量。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>防线</th>
+<th>参数</th>
+<th>语义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>帧条目上限</td>
+<td><code>MAX_SYNC_ITEMS=256</code></td>
+<td>单帧 SyncRouteInfo 条目超限 → 整帧拒绝（4009）</td>
+</tr>
+<tr>
+<td>条目字节上限</td>
+<td><code>MAX_ROUTE_INFO_BYTES=768</code></td>
+<td>单条 RoutePeerInfo 超限 → 丢弃该条（防巨型条目入库）</td>
+</tr>
+<tr>
+<td>分组总量上限</td>
+<td><code>MAX_ROUTES_PER_GROUP=128</code></td>
+<td>分组路由条目总数闸门（transit/幽灵），兼作出站全量推送体积上界</td>
+</tr>
+<tr>
+<td>直连表上限</td>
+<td><code>MAX_DIRECT_PEERS_REPORT=64</code></td>
+<td>ReportPeers 单上报者截断（PeerCenter 响应体积分量）</td>
+</tr>
+<tr>
+<td>出站硬闸</td>
+<td><code>MAX_MESSAGE_BYTES</code></td>
+<td><code>_send</code> 出站单帧校验（与入站对称），超限丢弃并计数</td>
+</tr>
+<tr>
+<td>全量重推冷却</td>
+<td><code>FULL_RESYNC_COOLDOWN_MS=1000</code></td>
+<td>会话重置与 GetGlobalPeerMap 全量响应每连接 ≥1s 一次；戳随 attachment 持久化，休眠唤醒不失效</td>
+</tr>
+<tr>
+<td>摘要抢占可观测</td>
+<td><code>MAX_NETWORK_NAME_BYTES=128</code></td>
+<td>空名/超长名拒绝（4002）；抢占嫌疑写 <code>squat-suspect</code> 审计事件（网络名+IP 10 分钟去重），总览计数可见</td>
+</tr>
+</tbody></table></div>
+<p><strong>上限自洽不变量</strong>：<code>MAX_ROUTES_PER_GROUP × MAX_ROUTE_INFO_BYTES &lt; MAX_MESSAGE_BYTES</code> —— 合法全量路由推送永不触发出站
+硬闸；PeerCenter 快照同理（64 上报者 × 64 条 × ~15B）。审计记录按帧聚合：
+单帧新增条目 &gt;16 时合并为一条 <code>add-batch</code> 记录，洪泛不挤爆记录环、不放大
+KV 写入。</p>
+<p><strong>同组互信边界</strong>：同一网络分组内的成员共享 <code>network_secret</code> 派生的摘要，
+协议层面互为可信对等点（官方 EasyTier 语义）——组内成员可得知彼此 peerId、
+可发起同 peerId 顶替（官方客户端重连即依赖该语义）。中继的防线边界在
+<strong>组外</strong>：未持密钥者无法进入分组、无法观测组内拓扑；抢占（堵门）与
+顶替（踢人）两类组内/组缘风险分别以「<code>NETWORK_SECRETS</code> 服务端校验 +
+squat-suspect 可观测」与「文档明示边界」处置，不做不兼容的协议改造。</p>
 
 </section>
 
@@ -594,6 +662,56 @@ storage 写、破坏自适应排程。现先 <code>getAlarm()</code>，仅当无
 <li>结果：空闲网络中 DO 仅被客户端心跳消息与自适应 alarm 唤醒，
 duration 计费趋近零，免费额度内稳定运行（实测见 §11.3）。</li>
 </ul>
+<h3 id="71-额度观测与趋势v160" class="heading-anchor"><a class="anchor" href="#71-额度观测与趋势v160" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>7.1 额度观测与趋势（v1.6.0）</h3>
+<p>三层数据源，逐层升级、逐层降级安全：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>层</th>
+<th>数据源</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>① 机器可读指标</td>
+<td><code>/metrics?format=prometheus</code>（Worker 层转换）</td>
+<td>复用 METRICS 门禁，<code>src/prometheus.js</code> 纯函数将 DO <code>_stats()</code> JSON 转为 text exposition format（25 指标、无 label、counter 带 <code>_total</code>）；默认 JSON 输出不变。v1.6.0 同时补齐 <code>_stats()</code> JSON（config 对齐管理端 20 项白名单 + sockets/audit 概览）</td>
+</tr>
+<tr>
+<td>② 账号级真实额度</td>
+<td>Cloudflare GraphQL Analytics API</td>
+<td>DO 内出站查询（不占入站额度）<code>workersInvocationsAdaptive</code> 当日 UTC 窗口 <code>sum{requests,subrequests,errors}</code>；结果缓存 DO storage <code>quota_cache</code>（成功 5 分钟/失败 1 分钟）；三态 <code>source=cloudflare/unconfigured/unavailable</code> 恒 200；<code>CF_API_TOKEN</code> 只存在于 DO 内存，绝不进入响应体/日志/审计</td>
+</tr>
+<tr>
+<td>③ 时序趋势</td>
+<td>Workers Analytics Engine</td>
+<td>alarm 内每 ≥60s <code>writeDataPoint</code>（空闲退避时自然稀疏）；<code>/internal/trends</code> 走 AE SQL API，24h=15min 桶、7d=1h 桶，SQL 分桶失败回退原始点服务端聚合；查询结果缓存 5 分钟</td>
+</tr>
+</tbody></table></div>
+<p>AE 数据点列映射（<code>src/room.js::_maybeWriteDot</code>，SQL 按列号引用勿调换）：</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>列</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>index1</code></td>
+<td>固定 <code>relay</code>（单索引，采样分布一致）</td>
+</tr>
+<tr>
+<td><code>blob1</code></td>
+<td>服务端版本串（低基数）</td>
+</tr>
+<tr>
+<td><code>double1~8</code></td>
+<td>在线节点 / 分组数 / 收包累计 / 发包累计 / 流量累计(字节) / 累计连接 / 协议错误 / alarm 累计</td>
+</tr>
+</tbody></table></div>
+<p>计数器随 DO 重启归零属预期：趋势图对收包速率按桶内增量计算、负增量（重启）钳为 0；
+在线节点为瞬时 gauge 取桶内均值。打点约 1,440 点/天（免费计划含 100,000 点/天），
+打点与查询均为出站/绑定操作，不消耗 100k 入站请求额度。</p>
 
 </section>
 
@@ -807,6 +925,19 @@ room 层转发给 <code>AuditStore</code>——纯逻辑层不依赖审计，单
 DO 在内部端点记录登录（同一 IP 10 分钟去重）与操作（action 明细）；
 查看（view）不记录（v1.3.0）。</li>
 </ul>
+<h3 id="96-审计数据最小化v160" class="heading-anchor"><a class="anchor" href="#96-审计数据最小化v160" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>9.6 审计数据最小化（v1.6.0）</h3>
+<p>两项独立开关（均默认关闭，配置见部署手册 §5.6）：</p>
+<ul>
+<li><strong><code>AUDIT_IP_MASK</code></strong>：<code>record()</code> 写入时对 <code>ev.ip</code> 打码——IPv4 保留 /16 前缀
+（<code>1.2.3.4</code> → <code>1.2.x.x</code>，含 IPv4-mapped IPv6）、IPv6 保留前 4 组。
+仅影响<strong>记录展示</strong>：黑名单存储、踢人拉黑（使用连接上的完整 <code>ws._clientIp</code>）、
+边缘层 KV 拦截均不受影响；旧记录不回填。</li>
+<li><strong><code>AUDIT_RETENTION_DAYS</code></strong>：alarm 内至多每小时一次调用
+<code>audit.pruneExpired(now)</code>，按记录 <code>ts</code> 过滤超过 N 天的条目；仅清理 6 类
+运行记录（admin 硬审计豁免），清理后标记脏键随下一轮 flush 同步
+DO storage 与 KV 镜像。空闲期 alarm 退避至 300s 不影响清理粒度
+（节流锚点为 1h）。</li>
+</ul>
 
 </section>
 
@@ -932,6 +1063,16 @@ easytier-cli --rpc-portal 127.0.0.1:15888 peer   # 应见 easytier-cf-relay 与 
 <td>64 peer 默认上限内无感知</td>
 </tr>
 <tr>
+<td>同组内 peerId 可被顶替</td>
+<td>EasyTier 协议固有语义（重连顶替），组内成员互信（共享网络密钥）</td>
+<td>顶替路径状态一致性已修复（先清后注）；组间风险由分组隔离与 <code>NETWORK_SECRETS</code> 防守</td>
+</tr>
+<tr>
+<td>未配置 <code>NETWORK_SECRETS</code> 的抢占风险</td>
+<td>先到者注册摘要后，不同密钥的后来者被拒（STRICT_DIGEST 隔离语义的另一面）</td>
+<td><code>squat-suspect</code> 审计可见攻击 IP；删除分组/摘要注册可解锁；配置 <code>NETWORK_SECRETS</code> 即免疫（注册表自愈）</td>
+</tr>
+<tr>
 <td>IPv6 子网信息</td>
 <td>RoutePeerInfo 原样透传（raw 字节路径保留官方字段），但服务端自身不宣告 v6</td>
 <td>客户端间 v6 组网不受影响</td>
@@ -947,9 +1088,11 @@ easytier-cli --rpc-portal 127.0.0.1:15888 peer   # 应见 easytier-cf-relay 与 
 │   ├── index.js          # Worker 入口：/health、/metrics 与管理端（自定义安全路径+token）、WS 升级、房间路由
 │   ├── room.js           # RelayRoom DO：连接生命周期、握手、转发、alarm 清扫、管理端内部端点、审计挂接
 │   ├── peer_manager.js   # 分组/peer 表/路由信息（direct/transit 来源）/会话/持久化（纯逻辑，可单测；onEvent 钩子）
-│   ├── audit.js          # KV 审计：六类事件记录 + 管理端硬审计 + 四类黑名单（每类一条 KV 键）
+│   ├── audit.js          # KV 审计：六类事件记录 + 管理端硬审计 + 四类黑名单（每类一条 KV 键）+ IP 打码/留存清理（v1.6）
+│   ├── prometheus.js     # Prometheus 文本格式输出（_stats JSON → text exposition，v1.6）
 │   ├── rpc.js            # RPC 编解码 + OspfRouteRpc/PeerCenterRpc 处理（含身份校验）
-│   ├── admin_ui.js       # Web 管理端单页（侧边栏列表式 + 分页 + 统计 + 批量操作 + 记录/黑名单页，API 全鉴权）
+│   ├── admin_ui.js       # Web 管理端单页（浅色默认 + 明暗/主色/圆角可定制 + 可收缩侧栏 + 总览瀑布流（趋势全宽双轴/卡片收起记忆/板块显隐）+ 设置与帮助模块 + 移动适配，API 全鉴权，v1.6 翻新）
+│   ├── assets.js         # 内嵌 favicon PNG
 │   ├── proto.js          # protobuf 类型入口（Long 配置、短名映射）
 │   ├── proto_gen.js      # pbjs 静态生成（勿手改；regen 见 tools/）
 │   ├── wire.js           # protobuf wire 层：未知字段保留、RoutePeerInfo 原字节重组
@@ -958,7 +1101,8 @@ easytier-cli --rpc-portal 127.0.0.1:15888 peer   # 应见 easytier-cf-relay 与 
 │   └── constants.js      # 协议常量（PacketType/flags/MAGIC…）
 ├── tools/
 │   ├── regen_proto.sh    # 从官方 .proto 重新生成 proto_gen.js
-│   └── proto_filter.json
+│   ├── proto_filter.json
+│   └── make_release.mjs  # 发行流程脚本（白名单复制/清理规则/禁词扫描/--check）
 ├── wrangler.toml         # 部署配置（变量说明见部署手册）
 └── docs/                 # 技术文档 / 部署手册 / 更新日志 / 客户端设置兼容性
 </code></pre></div>
