@@ -178,12 +178,11 @@ curl https://easytier-cf-relay.&lt;你的子域&gt;.workers.dev/health
 <blockquote>
 <p><strong>本地验证</strong>（可选，无需账号）：</p>
 <div class="code-block" data-lang="bash"><pre><code class="language-bash">npx wrangler dev --port 8787
-# 另一个终端
-curl http://127.0.0.1:8787/health
-# 期望: {&quot;ok&quot;:true}
+# 另一个终端：完整协议测试（44 项）
+node test/e2e_test.mjs http://127.0.0.1:8787
 </code></pre></div>
-<p>本地 <code>wrangler dev</code> 如需启用统计/管理端，可创建 <code>.dev.vars</code> 文件（已 gitignore，
-不随 deploy 上传）配置 <code>METRICS_PATH</code> / <code>ADMIN_PATH</code> 等 token。</p>
+<p>本地 <code>wrangler dev</code> 会自动读取 <code>.dev.vars</code>（已 gitignore，不随 deploy 上传），
+其中预置了 E2E 测试所需的 <code>METRICS_PATH</code> / <code>ADMIN_PATH</code> 等 token。</p>
 </blockquote>
 
 </section>
@@ -581,6 +580,7 @@ ADMIN_TOKEN = &quot;另一个长随机字符串&quot;
 防「升级头 + 内部路径」绕过 token 直达端点）；</li>
 <li>管理端页面壳本身无数据（可公开访问），所有数据 API 均需 token；</li>
 <li><strong>token 属于敏感信息</strong>：生产建议用 <code>npx wrangler secret put METRICS_TOKEN</code> 注入而非写进 toml；</li>
+<li><code>wrangler.toml</code> 中的 <code>[env.security]</code> 测试环境变量<strong>不会</strong>随默认 <code>wrangler deploy</code> 上传；</li>
 <li>管理页自动刷新间隔 30s（v1.4.0 起；且页面不可见时自动暂停），长开页面的请求量
 约 2.9k/天，对免费额度（100k/天）占用很小，不需要时可关闭自动刷新；
 v1.6.0 起「额度观测 / 趋势」在服务端报告未配置 CF 凭证后，前端会记住状态并
@@ -642,14 +642,20 @@ v1.6.0 起「额度观测 / 趋势」在服务端报告未配置 CF 凭证后，
 <td>wrangler.toml</td>
 <td>Analytics Engine 绑定（趋势打点）。绑定即自动建数据集，无需控制台操作</td>
 </tr>
+<tr>
+<td><code>AE_DATASET</code></td>
+<td>vars</td>
+<td>趋势 SQL 查询的 AE 数据集名，<strong>必须与 <code>AE</code> 绑定的 <code>dataset</code> 一致</strong>（AE 绑定无法在运行时读取自身 dataset 名）。默认 <code>easytier-cf-relay</code>（与 Worker 名一致）；<strong>绑定省略 <code>dataset</code> 时 wrangler 默认取 Worker 名</strong>；绑定改名/自定名的部署两处须一起改，否则趋势查询静默返回空（有节点也无数据）</td>
+</tr>
 </tbody></table></div>
 <div class="code-block" data-lang="toml"><pre><code class="language-toml">[vars]
 CF_ACCOUNT_ID = &quot;你的账号 ID&quot;
 CF_SCRIPT_NAME = &quot;easytier-cf-relay&quot;
+AE_DATASET = &quot;easytier-cf-relay&quot;   # 与下方 dataset 一致
 
 [[analytics_engine_datasets]]
 binding = &quot;AE&quot;
-dataset = &quot;easytier_relay&quot;
+dataset = &quot;easytier-cf-relay&quot;
 
 # Token 一律 secret 注入（不要写在这里）：
 #   npx wrangler secret put CF_API_TOKEN
@@ -811,7 +817,7 @@ curl -H &quot;Authorization: Bearer &lt;METRICS_TOKEN&gt;&quot; https://et.examp
 # }
 </code></pre></div>
 <p>字段速查：<code>forwards</code> = 数据包中继次数；<code>errors</code> = 协议错误数（应恒为 0）；
-<code>forgeries</code> = 源伪造拦截数；<code>groups</code> 按网络名分组列出在线 peer ID。</p>
+<code>forgeries</code> = 源伪造拦截数（F-06 防线命中）；<code>groups</code> 按网络名分组列出在线 peer ID。</p>
 <h3 id="82-web-管理端" class="heading-anchor"><a class="anchor" href="#82-web-管理端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>8.2 Web 管理端</h3>
 <p>配置 <code>ADMIN_PATH</code> + <code>ADMIN_TOKEN</code> 后，浏览器打开 <code>https://et.example.com&lt;ADMIN_PATH&gt;</code>
 进入控制台（输入 token 即可，浏览器本地保存）。</p>
@@ -998,6 +1004,11 @@ v1.6.0 起，此类握手被拒会写入 <code>squat-suspect</code> 审计事件
 按网络名+IP 10 分钟去重）——「记录查询 → 摘要注册」页可见抢占者并可拉黑其 IP；
 总览页「摘要抢占嫌疑」计数持续偏高即说明有人在尝试堵门。<strong>加固建议</strong>：公开部署
 强烈建议配置 <code>NETWORK_SECRETS</code>（服务端密钥校验，抢占直接失效）。</p>
+<p><strong>Q9：如何复跑安全测试？</strong></p>
+<div class="code-block" data-lang="bash"><pre><code class="language-bash">npx wrangler dev --env security --port 8788   # 使用 .dev.vars.security 中的测试 token
+node test/security_test.mjs                    # 45 项黑盒安全测试
+node test/audit_e2e_test.mjs                   # 34 项 KV 审计（记录/黑名单/边缘拦截）动态测试
+</code></pre></div>
 <p><strong>Q10：踢出/删除的节点或网络重连不上？</strong>
 这是黑名单在生效：踢出节点 / 删除分组 / 删除摘要注册 / 断开连接会把操作对象
 （PeerId / 网络名 / IP）加入对应类别黑名单并拦截后续接入。
@@ -1010,14 +1021,14 @@ v1.6.0 起，此类握手被拒会写入 <code>squat-suspect</code> 审计事件
 解除封锁后 KV 传播完成前（通常数秒，最长约 1 分钟）边缘层可能仍拒绝该 IP，
 稍候即可。</li>
 </ul>
-<p><strong>Q10：管理端记录为什么删不掉 / 关不掉？&quot;查看&quot;事件为什么不见了？</strong>
+<p><strong>Q11：管理端记录为什么删不掉 / 关不掉？&quot;查看&quot;事件为什么不见了？</strong>
 管理端审计（登录 IP/时间、操作）是<strong>硬设置</strong>（wrangler.toml <code>ADMIN_AUDIT</code>），
 管理页不可关闭、admin 类记录不可删除（防审计自擦除）。
 六类数据记录则可在「记录设置」页单独开关并设置上限。
 v1.3.0 起管理端&quot;查看&quot;事件不再记录（管理页自动刷新会持续刷屏且徒增写入）；
 黑名单拒绝事件同样不再写入「节点在线」记录（被拉黑客户端会不断重连，逐条记录
 会刷爆列表），拒绝次数改看总览页「黑名单拦截」计数。</p>
-<p><strong>Q11：被拉黑的客户端一直重连，会不会刷爆免费额度？</strong>
+<p><strong>Q12：被拉黑的客户端一直重连，会不会刷爆免费额度？</strong>
 每次重连尝试本身占用 1 次 Worker 请求（客户端行为，服务端无法避免），但
 v1.3.0 起：拒绝发生在 Worker 入口边缘层（读 KV 的 <code>bl:socket</code> 一条键），
 <strong>不再唤醒 Durable Object</strong>——不消耗 DO 请求与时长计费，也不产生任何审计写入

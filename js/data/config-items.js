@@ -1,7 +1,7 @@
 /**
  * config-items.js — wrangler.toml 生成器的配置项定义
  *
- * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.0）为唯一基准：
+ * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.1）为唯一基准：
  *   - comment 逐字复制 wrangler.toml 里对应变量上方的注释（含多行，用 \n 分行）；
  *     wrangler.toml 没写注释的变量（SERVER_HOSTNAME / SERVER_VERSION_STR /
  *     ROUTE_INFO_TTL_MS / ADMIN_AUDIT_LIMIT / ROOM_*）comment 留空，生成时不输出；
@@ -15,9 +15,11 @@
  *                （用于 CF_API_TOKEN 这类只允许 secret 注入、绝不写入明文的变量）
  *   type: 'text' | 'number' | 'select' | 'json'
  *   optional: true 表示默认关闭，需在页面上打开开关才写入配置（关闭时以注释形式保留）
- *   noEmit: true 表示只进表单、不进 [vars]（如 KV / AE 的绑定 id）
+ *   noEmit: true 表示只进表单、不进 [vars]（如 KV 绑定 id）
+ *   blankBefore: true 表示该变量在 TOML 里前面压一个空行（wrangler.toml 原文如此）
  *   validate: 校验规则名，见 generator.js
- *   comment: 写入 TOML 的注释（可多行，逐字对应 wrangler.toml）
+ *   comment: 写入 TOML 的注释（可多行，逐字对应 wrangler.toml；
+ *            以 # 开头的行视为已带前缀，用于 `#（…` 这类 # 后不空格的原文写法）
  *   groups[].header: 该组在 TOML 里的分节注释块（逐字对应 wrangler.toml）
  */
 window.ETCF_CONFIG = {
@@ -72,7 +74,7 @@ window.ETCF_CONFIG = {
           key: 'SERVER_VERSION_STR',
           label: '节点版本串',
           type: 'text',
-          default: 'easytier-cf-relay/1.6.0',
+          default: 'easytier-cf-relay/1.6.1',
           comment: '',
           help: 'easytier-cli peer 中可见的版本号，随版本发布更新（wrangler.toml 未加注释）。',
         },
@@ -671,7 +673,7 @@ window.ETCF_CONFIG = {
           kind: 'note',
           key: 'CF_API_TOKEN',
           label: 'Cloudflare API Token（必须 secret 注入）',
-          comment: 'Cloudflare API Token：必须用 secret 注入，绝不写入本文件明文！\n  npx wrangler secret put CF_API_TOKEN\n  权限只给「Account Analytics: Read」（供 GraphQL 额度查询与 AE SQL 趋势查询共用），\n  可随时在 Dashboard 吊销。见部署手册「额度观测与趋势」章节',
+          comment: 'Cloudflare API Token：必须用 secret 注入，绝不写入本文件明文！\n  npx wrangler secret put CF_API_TOKEN\n  权限只给「Account Analytics: Read」（供 GraphQL 额度查询与 AE SQL 趋势查询共用），\n  可随时在 Dashboard 吊销。见部署手册「额度观测与趋势」章节\n建议打开 https://dash.cloudflare.com/profile/api-tokens 选模板',
           help: '用 npx wrangler secret put CF_API_TOKEN 注入，绝不写入本文件明文。权限只给「Account Analytics: Read」（GraphQL 额度查询与 AE SQL 趋势查询共用），可随时在 Dashboard 吊销。',
         },
         {
@@ -687,12 +689,12 @@ window.ETCF_CONFIG = {
         {
           kind: 'single',
           key: 'AE_DATASET',
-          label: 'Analytics Engine 数据集名',
+          label: 'AE 数据集名（趋势查询）',
           type: 'text',
           default: 'easytier-cf-relay',
-          noEmit: true,
-          comment: '',
-          help: '绑定即自动建数据集，无需控制台操作；默认与 Worker 同名，改名部署时同步。趋势打点约 1,440 点/天，免费计划含 100,000 点/天，不占请求额度。',
+          blankBefore: true,
+          comment: '趋势查询的 AE 数据集名：必须与 [[analytics_engine_datasets]] 的 dataset 一致\n#（AE 绑定无法在运行时读取自身 dataset 名；wrangler 未写 dataset 时默认取 Worker 名）。\n默认 easytier-cf-relay 与发行配置的绑定一致；绑定改名的部署两处须一起改',
+          help: '必须与下方 [[analytics_engine_datasets]] 的 dataset 一致——生成器会把两处写成同一个值。默认与 Worker 同名，改名部署时两处一起改。趋势打点约 1,440 点/天，免费计划含 100,000 点/天，不占请求额度。',
         },
       ],
     },

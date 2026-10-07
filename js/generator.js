@@ -329,17 +329,18 @@
     L.push('');
     L.push('[vars]');
 
-    /** 注释逐字对应 wrangler.toml：可多行（\n 分行），空串不输出 */
+    /** 注释逐字对应 wrangler.toml：可多行（\n 分行），空串不输出。
+     *  以 # 开头的行视为已带前缀——用于 `#（…` 这种 # 后不空格的原文写法 */
     function pushComment(text) {
       if (text === undefined || text === null || text === '') return;
       String(text).split('\n').forEach(function (line) {
-        L.push('# ' + line);
+        L.push(line.charAt(0) === '#' ? line : '# ' + line);
       });
     }
 
     CONFIG.groups.forEach(function (g) {
       // 组级 header = wrangler.toml 里的分节注释块（KV 审计 / 监控与管理端 / 额度观测等）
-      (g.header || []).forEach(function (line) { L.push('# ' + line); });
+      (g.header || []).forEach(pushComment);
       var groupDisabled = g.toggle && g.toggle.scope === 'items' && !state.enabled[g.toggle.id];
       if (groupDisabled && !(g.header || []).length) {
         L.push('# 可选：' + g.title + '。' + '默认未启用，配置后生效');
@@ -351,7 +352,8 @@
           return;
         }
         if (item.kind === 'single') {
-          if (item.noEmit) return; // 仅用于绑定 id / AE 数据集，不进 [vars]
+          if (item.noEmit) return; // 仅用于绑定 id（KV namespace），不进 [vars]
+          if (item.blankBefore) L.push(''); // wrangler.toml 里该变量注释块前有一个空行
           var enabled;
           if (item.optional) enabled = !!state.enabled[item.key] && !groupDisabled;
           else enabled = !groupDisabled;
