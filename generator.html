@@ -13,6 +13,7 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/generator.css">
+<link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
 
@@ -25,9 +26,16 @@
     <nav class="site-nav" aria-label="站点导航">
       <a href="index.html">主页</a>
       <a href="generator.html" class="active" aria-current="page">配置生成器</a>
-      <a href="deploy.html">部署手册</a>
-      <a href="technical.html">技术文档</a>
-      <a href="changelog.html">更新日志</a>
+      <details class="nav-dropdown">
+        <summary>文档
+          <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5l3-3"/></svg>
+        </summary>
+        <div class="nav-dropdown-menu">
+          <a href="deploy.html">部署手册</a>
+          <a href="technical.html">技术文档</a>
+          <a href="changelog.html">更新日志</a>
+        </div>
+      </details>
     </nav>
     <div class="header-actions">
       <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
@@ -68,17 +76,33 @@
     </div>
   </section>
 
-  <div class="generator-presets" role="group" aria-label="配置预设">
-    <span class="presets-label">快速预设</span>
-    <button class="btn btn-sm" type="button" data-preset="default">默认配置</button>
-    <button class="btn btn-sm" type="button" data-preset="strictP2P">严格纯 P2P（关闭数据面兜底）</button>
-    <button class="btn btn-sm" type="button" data-preset="opsFull">完整运维（随机路径 + 强 token + KV 审计）</button>
-  </div>
-
   <div class="generator-grid">
 
-    <div id="gen-form" class="generator-form" aria-label="配置表单">
-      <!-- 由 js/generator.js 动态渲染 -->
+    <div class="generator-column">
+      <div class="generator-presets" role="group" aria-label="配置预设">
+        <span class="presets-label">快速预设</span>
+        <div class="presets-actions">
+          <button class="btn btn-sm" type="button" data-preset="default">默认配置</button>
+          <button class="btn btn-sm" type="button" data-preset="strictP2P">严格纯 P2P（关闭数据面兜底）</button>
+          <button class="btn btn-sm" type="button" data-preset="opsFull">完整运维（随机路径 + 强 token + KV 审计）</button>
+        </div>
+        <details class="preset-help">
+          <summary aria-label="查看快速预设说明" title="快速预设说明">?</summary>
+          <div class="preset-help-panel">
+            <p class="preset-help-title">快速预设说明</p>
+            <ul>
+              <li><strong>默认配置</strong>：与项目 <code>wrangler.toml</code> 的默认值一致，适合首次部署，只需补上自己的域名或使用 <code>*.workers.dev</code>。</li>
+              <li><strong>严格纯 P2P</strong>：设置 <code>AVOID_RELAY_DATA=1</code> 并关闭数据面兜底（<code>RELAY_DATA=0</code>）。两端打洞失败时将无法通过本节点转发流量，只保留信令与路由辅助。</li>
+              <li><strong>完整运维</strong>：打开 KV 审计，生成随机管理路径与强 token，并把日志级别设为 <code>info</code>；<code>AUDIT_KV_ID</code> 仍需填入你自己的 KV 命名空间 ID。</li>
+            </ul>
+            <p class="preset-help-note">每次点击都会先恢复默认值再套用，多个预设不会叠加。上线前建议把 token 改用 <code>wrangler secret put</code> 注入。</p>
+          </div>
+        </details>
+      </div>
+
+      <div id="gen-form" class="generator-form" aria-label="配置表单">
+        <!-- 由 js/generator.js 动态渲染 -->
+      </div>
     </div>
 
     <aside class="gen-preview" aria-label="生成结果预览">
@@ -118,7 +142,6 @@
           <li><a href="deploy.html">部署手册</a></li>
           <li><a href="technical.html">技术文档</a></li>
           <li><a href="changelog.html">更新日志</a></li>
-          <li><a href="网页说明文档.md">网页说明文档</a></li>
         </ul>
       </div>
       <div>
@@ -132,8 +155,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
-      <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4</span>
     </div>
   </div>
 </footer>

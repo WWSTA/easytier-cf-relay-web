@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>更新日志 — easytier-cf-relay</title>
-<meta name="description" content="EasyTier Cloudflare Relay 各版本变更明细（v1.0.0 ~ v1.6.1），Keep a Changelog 格式。">
+<meta name="description" content="EasyTier Cloudflare Relay 各版本变更明细（v1.0.0 ~ v1.6.2），Keep a Changelog 格式。">
 <link rel="icon" href="favicon.ico">
 <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
 <script src="js/theme.js"></script>
@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/brand.css">
 </head>
 <body>
 
@@ -24,9 +25,14 @@
     <nav class="site-nav" aria-label="站点导航">
         <a href="index.html">主页</a>
         <a href="generator.html">配置生成器</a>
+        <details class="nav-dropdown">
+        <summary class="active" aria-current="true">文档 <svg viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5 6 7.5l3-3"/></svg></summary>
+        <div class="nav-dropdown-menu">
         <a href="deploy.html">部署手册</a>
         <a href="technical.html">技术文档</a>
         <a href="changelog.html" class="active" aria-current="page">更新日志</a>
+        </div>
+        </details>
     </nav>
     <div class="header-actions">
       <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="切换主题" title="切换主题">
@@ -48,7 +54,8 @@
     <p class="toc-title">本页目录</p>
     <ul>
           <li class="toc-h2"><a href="#version-overview">版本一览</a></li>
-          <li class="toc-h2"><a href="#161-2026-10-07">[1.6.1] - 2026-10-07</a></li>
+          <li class="toc-h2"><a href="#162-2026-10-25">[1.6.2] - 2026-10-25</a></li>
+          <li class="toc-h2 toc-extended"><a href="#161-2026-10-07">[1.6.1] - 2026-10-07</a></li>
           <li class="toc-h2 toc-extended"><a href="#160-2026-10-06">[1.6.0] - 2026-10-06</a></li>
           <li class="toc-h2 toc-extended"><a href="#150-2026-10-1">[1.5.0] - 2026-10-1</a></li>
           <li class="toc-h2 toc-extended"><a href="#142-2026-10-1">[1.4.2] - 2026-10-1</a></li>
@@ -91,7 +98,8 @@
 <table>
 <thead><tr><th>版本</th><th>日期</th><th>重点</th><th>花费</th></tr></thead>
 <tbody>
-<tr><td><span class="pill">v1.6.1</span></td><td>2026-10-07</td><td>修复 v1.6.0 趋势图不显示数据（Analytics SQL API 适配 + 新增 <code>AE_DATASET</code>）与两处管理页界面问题，无协议与额度开销变更</td><td>—</td></tr>
+<tr><td><span class="pill">v1.6.2</span></td><td>2026-10-17</td><td>质量修复：路由会话重置 / 状态重建 / 写回重试 / 管理页收起记忆 / NETWORK_SECRETS 告警；新增落盘降级指标与质量看护，配置与版本链统一为单一事实源</td><td>—</td></tr>
+<tr><td>v1.6.1</td><td>2026-10-07</td><td>修复 v1.6.0 趋势图不显示数据（Analytics SQL API 适配 + 新增 <code>AE_DATASET</code>）与两处管理页界面问题，无协议与额度开销变更</td><td>—</td></tr>
 <tr><td>v1.6.0</td><td>2026-10-06</td><td>观测升级（Prometheus 文本输出、账号级真实额度、Analytics Engine 趋势图）、管理端体验翻新与资源滥用防线加固</td><td>46 RMB</td></tr>
 <tr><td>v1.5.0</td><td>2026-10-01</td><td>防护与观测：单连接消息速率限制、每分组节点上限、总览额度估算卡片、房间满重连修复</td><td>13 RMB</td></tr>
 <tr><td>v1.4.2</td><td>2026-10-01</td><td>安全加固：修复发往服务端 RPC 未绑定连接身份的盲区、黑名单粒度细化、常数时间 token 比较</td><td>11 RMB</td></tr>
@@ -105,11 +113,43 @@
 </div>
 </div>
 
-<section class="doc-sec" id="161-2026-10-07-sec">
+<section class="doc-sec" id="162-2026-10-25-sec">
+<h2 id="162-2026-10-25" class="heading-anchor"><a class="anchor" href="#162-2026-10-25" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.6.2] - 2026-10-25</h2>
+<p>质量修复版本：修复五处正确性/体验缺陷，补齐一处可观测指标，并把配置默认
+值与版本链统一到单一事实源、新增自动化看护。无协议变更，全部修复对免费
+额度（CPU / DO / KV / AE）零新增常态消耗。</p>
+<h3 id="修复" class="heading-anchor"><a class="anchor" href="#修复" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
+<ul>
+<li><strong>客户端路由会话重启后可能收不到已同步路由</strong>：客户端不断线重开会话时，
+服务端只更新会话标识而未同步重置增量推送状态，重启后重新入网的节点可能
+收不到已发送过版本的路由与连通位图，直至版本自然变化。两条会话更新路径
+现统一重置语义。</li>
+<li><strong>持久化数据损坏时误清空洞内存活连接</strong>：DO 状态损坏触发重建时，会把休眠
+唤醒已恢复的在线连接一并清除——这些连接因已完成握手无法重新入网，成为
+收不到转发的「僵尸连接」，直至客户端自断重连。现仅丢弃损坏的持久化数据、
+保留存活连接，且启动日志会记录载入失败原因。</li>
+<li><strong>状态写回连续降级失败后丢失重试机会</strong>：落盘三档降级全部失败时脏标记被
+提前复位，该批状态要到下一次成员变化才会再尝试写回；现仅在写回成功后复位。</li>
+<li><strong>管理页卡片收起状态不记忆</strong>：收起状态此前只写不读，30 秒自动刷新或重载
+后所有卡片重新展开；现在刷新与重载后保持收起。</li>
+<li><strong>NETWORK_SECRETS 配置写错被静默忽略</strong>：该变量不是合法 JSON 对象时，网络
+密钥校验悄然失效且无任何提示；现启动日志明确告警。</li>
+</ul>
+<h3 id="变更" class="heading-anchor"><a class="anchor" href="#变更" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<ul>
+<li>统计卡与 <code>/metrics</code> 新增落盘降级计数 <code>easytier_flush_degraded_total</code>
+（观测状态写回是否触发降级重试）。</li>
+<li>配置默认值、WebSocket close code、分页状态与统计接口的配置视图统一到
+单一事实源（constants 导出）。</li>
+</ul>
+
+</section>
+
+<section class="doc-sec sec-extended" id="161-2026-10-07-sec">
 <h2 id="161-2026-10-07" class="heading-anchor"><a class="anchor" href="#161-2026-10-07" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>[1.6.1] - 2026-10-07</h2>
 <p>修复版本：修复 v1.6.0 趋势图不显示数据的问题与两处管理页界面问题，无协议
 与免费额度开销变更。</p>
-<h3 id="修复" class="heading-anchor"><a class="anchor" href="#修复" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
+<h3 id="修复-2" class="heading-anchor"><a class="anchor" href="#修复-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
 <ul>
 <li><strong>趋势图无数据</strong>（v1.6.0 遗留）：趋势查询适配 Cloudflare Analytics SQL API
 （显式 <code>FORMAT JSON</code>、按列名解析、schema 限定名 + accountTag 过滤按数据集
@@ -162,7 +202,7 @@ Read，可随时吊销），只在服务端使用，绝不下发浏览器 / 日�
 IP 打码；<code>AUDIT_RETENTION_DAYS</code>（默认 0 = 不限）alarm 每小时清理过期
 记录（管理端硬审计豁免）。</li>
 </ul>
-<h3 id="变更" class="heading-anchor"><a class="anchor" href="#变更" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<h3 id="变更-2" class="heading-anchor"><a class="anchor" href="#变更-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
 <ul>
 <li><strong>管理端视觉翻新</strong>：白色浅色默认 + 明暗 / 主色 / 圆角可定制（侧栏设置
 弹层，记忆在浏览器本地）；侧栏可收缩，移动端专项优化；总览重构为瀑布流
@@ -216,7 +256,7 @@ secret 注入，文件内只留说明注释。</li>
 重连顶替豁免——此前升级层 HTTP 429 会把已有节点断线后的重连恢复也一并
 挡死，旧连接半开后永远无法恢复。</li>
 </ul>
-<h3 id="变更-2" class="heading-anchor"><a class="anchor" href="#变更-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<h3 id="变更-3" class="heading-anchor"><a class="anchor" href="#变更-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
 <ul>
 <li>管理端 API 的状态接口（<code>/api/state</code>）config 字段扩充（新增 9 个此前未下发
 的运行参数），总览页据此渲染——纯增量，不影响既有消费者。</li>
@@ -246,7 +286,7 @@ secret 注入，文件内只留说明注释。</li>
 <li><strong>未握手连接可触达路由会话逻辑</strong>：与上一条同一分支、同批修复——未完成
 握手的连接发送 RPC 直接丢弃，与转发路径行为一致。</li>
 </ul>
-<h3 id="变更-3" class="heading-anchor"><a class="anchor" href="#变更-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<h3 id="变更-4" class="heading-anchor"><a class="anchor" href="#变更-4" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
 <ul>
 <li><strong>删除分组 / 删除摘要注册的黑名单粒度改为「网络名:摘要」</strong>（digest 类）：
 此前拉黑整个网络名——在被摘要抢占的场景下，管理员删除分组/摘要注册反而
@@ -287,7 +327,7 @@ secret 注入，文件内只留说明注释。</li>
 <li><strong>站点图标</strong>：<code>/favicon.ico</code> 返回内嵌的 128×128 项目图标（用Easytier官方图标当占位图）（原为 404），
 浏览器缓存 1 天；管理页 <code>&lt;head&gt;</code> 同步声明。</li>
 </ul>
-<h3 id="变更-4" class="heading-anchor"><a class="anchor" href="#变更-4" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<h3 id="变更-5" class="heading-anchor"><a class="anchor" href="#变更-5" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
 <ul>
 <li><strong>KV 键前缀更名</strong>：<code>et-relay:</code> → <code>easytier-cf-relay:</code>。首次启动
 自动一次性迁移旧键数据（新前缀完全为空才回读旧前缀，新旧绝不混用）；
@@ -312,7 +352,7 @@ secret 注入，文件内只留说明注释。</li>
 2s 可恢复，非死锁）；批量上线时还产生冗余 storage 写。现先 <code>getAlarm()</code>，
 仅当无闹钟或已有闹钟比目标更晚时才设置，<strong>绝不推迟更早的闹钟</strong>。</li>
 </ul>
-<h3 id="变更-5" class="heading-anchor"><a class="anchor" href="#变更-5" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
+<h3 id="变更-6" class="heading-anchor"><a class="anchor" href="#变更-6" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>变更</h3>
 <ul>
 <li><strong>alarm 自适应排程</strong>（<code>src/room.js</code>）：重挂间隔不再固定 15s，由 <code>_nextAlarmDelay()</code>
 计算——有连接时取 <code>min(SWEEP_INTERVAL_MS, 最近的 socket 事件时刻)</code>（未握手
@@ -442,7 +482,7 @@ KV 镜像仅写脏键并按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）�
 <li><code>BLACKLIST_LIMIT</code>（各黑名单上限，默认 1000）</li>
 <li><code>ADMIN_AUDIT</code> / <code>ADMIN_AUDIT_LIMIT</code>（管理端审计硬开关与上限，默认开 / 200）</li>
 </ul>
-<h3 id="修复-2" class="heading-anchor"><a class="anchor" href="#修复-2" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
+<h3 id="修复-3" class="heading-anchor"><a class="anchor" href="#修复-3" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>修复</h3>
 <ul>
 <li>运行时长在 DO 休眠或重启后重新计时的问题：首次启动时间持久化到 DO storage，
 现按房间首次创建起累计（含休眠时间），管理页附说明提示</li>
@@ -606,7 +646,6 @@ README 同步功能清单</li>
           <li><a href="deploy.html">部署手册</a></li>
           <li><a href="technical.html">技术文档</a></li>
           <li><a href="changelog.html">更新日志</a></li>
-          <li><a href="网页说明文档.md">网页说明文档</a></li>
         </ul>
       </div>
       <div>
@@ -620,8 +659,7 @@ README 同步功能清单</li>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4 ｜ 由 GLM 系列模型辅助开发</span>
-      <span>本项目仅供学习交流，请勿用于任何商业用途或非法用途。</span>
+      <span>MIT License © 2026 WWSTA ｜ 协议对齐 easytier-core 2.6.4</span>
     </div>
   </div>
 </footer>

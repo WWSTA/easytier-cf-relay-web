@@ -1,0 +1,366 @@
+/* 首页「功能特性」气泡图谱 — 由 demo/features-bubbles.html 适配而来 */
+
+.feature-graph {
+    --cat-net: #3f6fe0;   --cat-net-soft: #dbe6ff;
+    --cat-sec: #0f7b52;   --cat-sec-soft: #d7f0e3;
+    --cat-ops: #6a4bd8;   --cat-ops-soft: #e7e1ff;
+    --cat-quota: #9a6200; --cat-quota-soft: #ffedcc;
+  }
+  html[data-theme="dark"] .feature-graph {
+    --cat-net: #9bb5ff;   --cat-net-soft: #1a2a4a;
+    --cat-sec: #5fd3a4;   --cat-sec-soft: #0f2a20;
+    --cat-ops: #b9a5ff;   --cat-ops-soft: #201a33;
+    --cat-quota: #f0c46a; --cat-quota-soft: #2a2213;
+  }
+  .bubble[data-cat="net"]   { --cat: var(--cat-net);   --cat-soft: var(--cat-net-soft); }
+  .bubble[data-cat="sec"]   { --cat: var(--cat-sec);   --cat-soft: var(--cat-sec-soft); }
+  .bubble[data-cat="ops"]   { --cat: var(--cat-ops);   --cat-soft: var(--cat-ops-soft); }
+  .bubble[data-cat="quota"] { --cat: var(--cat-quota); --cat-soft: var(--cat-quota-soft); }
+  .bubble { --cat: var(--brand-500); --cat-soft: var(--brand-200); }
+
+  
+
+  .feature-stage {
+    position: relative;
+    width: 100%;
+    height: clamp(620px, calc(100vh - 190px), 760px);
+    overflow: hidden;
+    border-radius: 20px;
+    background: var(--bg-default);
+    box-shadow: var(--shadow-small);
+  }
+  .feature-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, var(--border-muted) 1px, transparent 1.2px);
+    background-size: 24px 24px;
+    opacity: .7;
+    pointer-events: none;
+  }
+
+  /* ---------- 连线 ---------- */
+  .graph-links {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 1;
+    transition: opacity .22s;
+  }
+  .graph-links path {
+    fill: none;
+    stroke: var(--brand-200);
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    transition: stroke .15s;
+  }
+  html[data-theme="dark"] .graph-links path { stroke: var(--brand-300); }
+  .graph-links path.is-hot { stroke: var(--brand-500); }
+  .feature-stage.has-active .graph-links { opacity: .12; }
+
+  /* ---------- 中心节点 ---------- */
+  .stage-hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: clamp(180px, 19vw, 220px);
+    height: clamp(180px, 19vw, 220px);
+    padding: 24px;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    box-shadow: var(--shadow-medium);
+    text-align: center;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    will-change: transform;
+    transform: translate(calc(-50% + var(--hub-dx, 0px)), calc(-50% + var(--hub-dy, 0px)));
+    transition: opacity .25s;
+  }
+  .stage-hub.is-dragging { cursor: grabbing; }
+  .hub-kicker {
+    color: var(--fg-subtle);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .stage-hub .hub-title {
+    margin: 4px 0 6px;
+    font-size: clamp(22px, 2.1vw, 27px);
+    line-height: 1.2;
+  }
+    .feature-stage.has-active .stage-hub {
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(calc(-50% + var(--hub-dx, 0px)), calc(-50% + var(--hub-dy, 0px))) scale(.96);
+    pointer-events: none;
+  }
+
+  .bubble-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ---------- 功能节点 ---------- */
+  .bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: auto;
+    will-change: transform, width, height;
+  }
+  .bubble-scale {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 50%;
+    background: var(--bg-overlay);
+    box-shadow:
+      inset 0 0 0 1.5px var(--cat-soft),
+      0 1px 2px rgba(16, 24, 40, .05),
+      0 18px 34px -26px rgba(16, 24, 40, .32);
+    transition: transform .18s, box-shadow .18s, opacity .22s, border-radius .22s;
+  }
+  html[data-theme="dark"] .bubble-scale {
+    box-shadow:
+      inset 0 0 0 2px var(--cat-soft),
+      0 1px 2px rgba(0, 0, 0, .35),
+      0 20px 38px -26px rgba(0, 0, 0, .8);
+  }
+
+  .bubble-toggle {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: center;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    transition: opacity .16s, visibility .16s;
+  }
+  .bubble-toggle:focus-visible { outline: 3px solid var(--brand-300); outline-offset: -4px; }
+  .bubble-title {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: var(--fg-default);
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .bubble-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--accent-subtle);
+    color: var(--accent-fg);
+  }
+  .bubble-icon svg { width: 26px; height: 26px; }
+
+  .bubble:not(.is-active):hover .bubble-scale {
+    transform: scale(1.035);
+    box-shadow:
+      inset 0 0 0 2px var(--cat),
+      0 22px 42px -28px rgba(16, 24, 40, .38);
+  }
+  .bubble.is-dragging { z-index: 40; }
+  .bubble.is-dragging .bubble-toggle { cursor: grabbing; }
+  .bubble.is-dragging .bubble-scale {
+    transform: scale(1.05);
+    box-shadow:
+      inset 0 0 0 2px var(--cat),
+      0 24px 48px -26px rgba(16, 24, 40, .42);
+  }
+
+  /* ---------- 原位放大的详情层 ---------- */
+  .bubble-detail {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .18s, visibility .18s;
+  }
+  .detail-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    width: min(300px, 78%);
+    max-height: 100%;
+    overflow: auto;
+    text-align: left;
+    scrollbar-width: thin;
+  }
+  .detail-title {
+    margin: 0;
+    color: var(--fg-default);
+    font-size: 19px;
+    font-weight: 650;
+    line-height: 1.3;
+  }
+  .detail-desc {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: 13.5px;
+    line-height: 1.72;
+  }
+  .detail-link {
+    margin-top: 2px;
+    color: var(--accent-fg);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .detail-link:hover { text-decoration: underline; }
+
+  .bubble-close {
+    position: absolute;
+    top: 14%;
+    right: 14%;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+    color: var(--fg-muted);
+    font: 400 19px/1 system-ui, sans-serif;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .16s, visibility .16s, background-color .16s, color .16s;
+  }
+  .bubble-close:hover { background: var(--accent-subtle); color: var(--accent-fg); }
+  .bubble-close:focus-visible { outline: 3px solid var(--brand-300); outline-offset: 2px; }
+
+  .bubble.is-active { z-index: 60; }
+  .bubble.is-active .bubble-scale {
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--brand-300), var(--shadow-large);
+  }
+  .bubble.is-active .bubble-toggle { opacity: 0; visibility: hidden; pointer-events: none; }
+  .bubble.is-active .bubble-detail { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: .1s; }
+  .bubble.is-active .bubble-close { opacity: 1; visibility: visible; pointer-events: auto; }
+  .bubble.is-dimmed { opacity: .28; }
+  .bubble.is-dimmed .bubble-toggle { pointer-events: none; }
+
+  .feature-graph.is-mobile .feature-stage {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    padding: 24px 16px 28px;
+    border-radius: 18px;
+  }
+  .feature-graph.is-mobile .feature-stage::before { display: none; }
+  .feature-graph.is-mobile .graph-links { display: none; }
+  .feature-graph.is-mobile .stage-hub {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0 0 20px;
+    padding: 14px;
+    border-radius: 14px;
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+    transform: none;
+  }
+  .feature-graph.is-mobile .stage-hub .hub-title { margin: 2px 0 4px; font-size: 23px; }
+  .feature-graph.is-mobile .feature-stage.has-active .stage-hub { opacity: 1; visibility: visible; transform: none; }
+  .feature-graph.is-mobile .bubble-layer {
+    position: static;
+    z-index: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    justify-items: center;
+  }
+  .feature-graph.is-mobile .bubble { position: relative; transform: none !important; }
+  .feature-graph.is-mobile .bubble-toggle { gap: 6px; padding: 10px; }
+  .feature-graph.is-mobile .bubble-icon { width: 38px; height: 38px; border-radius: 10px; }
+  .feature-graph.is-mobile .bubble-icon svg { width: 21px; height: 21px; }
+  .feature-graph.is-mobile .bubble-title { font-size: 12.5px; line-height: 1.3; }
+  .feature-graph.is-mobile .bubble.is-dimmed { opacity: .45; }
+
+  /* 同一个节点在网格里展开，占满整行并撑高，不出现浮层 */
+  .feature-graph.is-mobile .bubble.is-active {
+    grid-column: 1 / -1;
+    width: 100% !important;
+    height: auto !important;
+    z-index: 5;
+    scroll-margin: 16px;
+  }
+  .feature-graph.is-mobile .bubble.is-active .bubble-scale {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    border-radius: 24px;
+  }
+  .feature-graph.is-mobile .bubble.is-active .bubble-toggle { display: none; }
+  .feature-graph.is-mobile .bubble.is-active .bubble-detail {
+    position: relative;
+    inset: auto;
+    padding: 30px 22px 26px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+  .feature-graph.is-mobile .bubble.is-active .detail-inner {
+    width: 100%;
+    max-width: 100%;
+    max-height: none;
+    overflow: visible;
+  }
+  .feature-graph.is-mobile .bubble.is-active .bubble-close {
+    top: 14px;
+    right: 14px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+/* 首页集成 */
+.feature-graph { position: relative; width: 100%; }
+.stage-hub .hub-title { display: block; font-weight: 650; }

@@ -1,7 +1,7 @@
 /**
  * config-items.js — wrangler.toml 生成器的配置项定义
  *
- * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.1）为唯一基准：
+ * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.2）为唯一基准：
  *   - comment 逐字复制 wrangler.toml 里对应变量上方的注释（含多行，用 \n 分行）；
  *     wrangler.toml 没写注释的变量（SERVER_HOSTNAME / SERVER_VERSION_STR /
  *     ROUTE_INFO_TTL_MS / ADMIN_AUDIT_LIMIT / ROOM_*）comment 留空，生成时不输出；
@@ -35,7 +35,7 @@ window.ETCF_CONFIG = {
       id: 'identity',
       title: '基础身份',
       desc: '节点在网络中的身份与宣告信息',
-      open: true,
+      open: false,
       header: [
         'WebSocket 路径：接受任意路径的升级请求（与官方服务端行为一致），',
         '客户端 -p 直接使用 wss://<域名> 即可；/health 与 /metrics 保留',
@@ -74,7 +74,7 @@ window.ETCF_CONFIG = {
           key: 'SERVER_VERSION_STR',
           label: '节点版本串',
           type: 'text',
-          default: 'easytier-cf-relay/1.6.1',
+          default: 'easytier-cf-relay/1.6.2',
           comment: '',
           help: 'easytier-cli peer 中可见的版本号，随版本发布更新（wrangler.toml 未加注释）。',
         },
@@ -106,7 +106,7 @@ window.ETCF_CONFIG = {
       id: 'p2p',
       title: 'P2P 与转发',
       desc: '纯 P2P 优先与数据面兜底策略',
-      open: true,
+      open: false,
       items: [
         {
           kind: 'single',
@@ -141,7 +141,7 @@ window.ETCF_CONFIG = {
       id: 'limits',
       title: '容量与超时',
       desc: '连接上限、事前限流与幽灵节点防线参数',
-      open: true,
+      open: false,
       items: [
         {
           kind: 'single',
@@ -293,7 +293,7 @@ window.ETCF_CONFIG = {
       id: 'abuse',
       title: '资源滥用防线（v1.6）',
       desc: '路由洪泛 / 请求放大 / 出站与状态总量多维上限；均为处理途中同步检查，正常用户零开销',
-      open: true,
+      open: false,
       items: [
         {
           kind: 'single',
@@ -362,7 +362,7 @@ window.ETCF_CONFIG = {
       id: 'security',
       title: '安全',
       desc: '未知路径防护与服务端密钥校验',
-      open: true,
+      open: false,
       items: [
         {
           kind: 'single',
@@ -441,8 +441,9 @@ window.ETCF_CONFIG = {
         '不配置 AUDIT_KV 绑定时功能优雅降级：记录/黑名单仅存 Durable Object storage。',
         '---------------------------------------------------------------------------',
         '每类信息只占一条 KV 键（记录 7 条 + 黑名单 4 条，共 11 条）：',
-        '  记录键   et-relay:rec:<groups|peers|routes|peercenter|sockets|digests|admin>',
-        '  黑名单键 et-relay:bl:<peer|group|digest|socket>',
+        '  记录键   easytier-cf-relay:rec:<groups|peers|routes|peercenter|sockets|digests|admin>',
+        '  黑名单键 easytier-cf-relay:bl:<peer|group|digest|socket>',
+        '#（旧前缀 et-relay: 仅作一次性迁移读取——src/audit.js LEGACY_KV_PREFIX，绝不写入）',
       ],
       toggle: { id: 'auditKv', label: '启用 AUDIT_KV 绑定', scope: 'kvBinding' },
       toggleHelp:

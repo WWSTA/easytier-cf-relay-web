@@ -5,6 +5,7 @@
  *  3. 标签页（客户端接入方式）
  *  4. 文档页「完整 / 精炼」视图切换（localStorage 记忆）
  *  5. 文档侧栏目录滚动定位
+ *  6. 入口卡点击复制（首页演示节点 wss 地址）
  */
 (function () {
   'use strict';
@@ -64,6 +65,32 @@
     });
     nav.addEventListener('click', function (e) {
       if (e.target.closest('a')) nav.classList.remove('open');
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     1b. 顶部「文档」下拉
+     ------------------------------------------------------------------ */
+  function initNavDropdown() {
+    var dropdown = document.querySelector('.nav-dropdown');
+    if (!dropdown) return;
+    var summary = dropdown.querySelector('summary');
+    if (!summary) return;
+    summary.setAttribute('aria-expanded', dropdown.open ? 'true' : 'false');
+    dropdown.addEventListener('toggle', function () {
+      summary.setAttribute('aria-expanded', dropdown.open ? 'true' : 'false');
+    });
+    dropdown.addEventListener('click', function (e) {
+      if (e.target.closest('a')) dropdown.removeAttribute('open');
+    });
+    document.addEventListener('click', function (e) {
+      if (dropdown.open && !dropdown.contains(e.target)) dropdown.removeAttribute('open');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && dropdown.open) {
+        dropdown.removeAttribute('open');
+        summary.focus();
+      }
     });
   }
 
@@ -239,16 +266,47 @@
   }
 
   /* ------------------------------------------------------------------
+     6. 入口卡「点击复制」（首页演示节点 wss 地址）
+     ------------------------------------------------------------------ */
+  function initCopyEntries() {
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest('[data-copy-entry]');
+      if (!el) return;
+      var go = el.querySelector('.entry-go');
+      if (!go) return;
+      var old = go.textContent;
+      copyText(el.getAttribute('data-copy-entry')).then(
+        function () {
+          go.textContent = '已复制 ✓';
+          go.classList.add('copied');
+          setTimeout(function () {
+            go.textContent = old;
+            go.classList.remove('copied');
+          }, 1600);
+        },
+        function () {
+          go.textContent = '复制失败';
+          setTimeout(function () {
+            go.textContent = old;
+          }, 1600);
+        }
+      );
+    });
+  }
+
+  /* ------------------------------------------------------------------
      初始化
      ------------------------------------------------------------------ */
   window.etcfCopy = copyText;
 
   document.addEventListener('DOMContentLoaded', function () {
     initNav();
+    initNavDropdown();
     initCodeBlocks();
     initCopyButtons();
     initTabs();
     initDocView();
     initScrollSpy();
+    initCopyEntries();
   });
 })();

@@ -814,6 +814,8 @@
     },
   };
 
+  var presetHelp = document.querySelector('.preset-help');
+
   Array.prototype.forEach.call(document.querySelectorAll('[data-preset]'), function (btn) {
     btn.addEventListener('click', function () {
       var name = btn.getAttribute('data-preset');
@@ -825,8 +827,18 @@
       Array.prototype.forEach.call(document.querySelectorAll('[data-preset]'), function (b) {
         b.classList.toggle('active', b === btn);
       });
+      if (presetHelp) presetHelp.removeAttribute('open');
     });
   });
+
+  if (presetHelp) {
+    document.addEventListener('click', function (e) {
+      if (presetHelp.open && !presetHelp.contains(e.target)) presetHelp.removeAttribute('open');
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && presetHelp.open) presetHelp.removeAttribute('open');
+    });
+  }
 
   /* ================================================================
      启动
