@@ -81,10 +81,89 @@
     return s;
   }
 
-  var state = mergeSaved(defaults(), readSaved());
+  function copyPlain(o) {
+    var r = {};
+    for (var k in o) {
+      if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k];
+    }
+    return r;
+  }
 
-  // 旧版本默认值为非补零日期（2026-10-1），已存本地的旧值自动迁移为标准 YYYY-MM-DD 格式
+  /** 通用迁移：存档带 _defaults 快照时，用户从未改过的项（存档值 ===
+   *  保存时默认值）自动跟随当前默认值；改过的值原样保留。
+   *  返回被刷新的键名列表，供页面提示。 */
+  function adoptNewDefaults(state, saved, current) {
+    if (!saved || !saved._defaults) return [];
+    var old = saved._defaults;
+    var adopted = [];
+    if (old.values && saved.values) {
+      Object.keys(current.values).forEach(function (k) {
+        if (saved.values[k] !== undefined &&
+            String(saved.values[k]) === String(old.values[k]) &&
+            String(state.values[k]) !== String(current.values[k])) {
+          state.values[k] = current.values[k];
+          adopted.push(k);
+        }
+      });
+    }
+    if (old.enabled && saved.enabled) {
+      Object.keys(current.enabled).forEach(function (k) {
+        if (saved.enabled[k] !== undefined &&
+            !!saved.enabled[k] === !!old.enabled[k] &&
+            !!state.enabled[k] !== !!current.enabled[k]) {
+          state.enabled[k] = current.enabled[k];
+          adopted.push(k);
+        }
+      });
+    }
+    if (old.deploy && saved.deploy) {
+      ['name', 'date'].forEach(function (k) {
+        if (saved.deploy[k] !== undefined &&
+            String(saved.deploy[k]) === String(old.deploy[k]) &&
+            String(state.deploy[k]) !== String(current.deploy[k])) {
+          state.deploy[k] = current.deploy[k];
+          adopted.push('@' + k);
+        }
+      });
+      if (old.deploy.domain && saved.deploy.domain) {
+        ['enabled', 'pattern', 'mode', 'zone'].forEach(function (k) {
+          if (saved.deploy.domain[k] !== undefined &&
+              String(saved.deploy.domain[k]) === String(old.deploy.domain[k]) &&
+              String(state.deploy.domain[k]) !== String(current.deploy.domain[k])) {
+            state.deploy.domain[k] = current.deploy.domain[k];
+            adopted.push('@domain-' + k);
+          }
+        });
+      }
+    }
+    return adopted;
+  }
+
+  var base = defaults();
+  // 捕获「本次加载时生效的默认值」：既作为 adoptNewDefaults 的对照基准，
+  // 也随 save() 落盘为 _defaults 快照，供下次加载判定哪些项被用户改过
+  var currentDefaults = {
+    values: copyPlain(base.values),
+    enabled: copyPlain(base.enabled),
+    deploy: JSON.parse(JSON.stringify(base.deploy)),
+  };
+  var savedRaw = readSaved();
+  var state = mergeSaved(base, savedRaw);
+
+  var adoptedKeys = adoptNewDefaults(state, savedRaw, currentDefaults);
+
+  // 以下两条为特例迁移，兜底不带 _defaults 快照的历史存档：
+  // 1) 旧版本默认值为非补零日期（2026-10-1），自动迁移为标准 YYYY-MM-DD 格式
   if (state.deploy.date === '2026-10-1') state.deploy.date = '2026-10-01';
+
+  // 2) SERVER_VERSION_STR 随版本发布更新：旧发布版本串自动迁移为当前默认值
+  //    （严格对照 wrangler.toml）；自定义的非官方版本串（不匹配
+  //    easytier-cf-relay/<数字> 形态）不受影响。存档带快照时上方已通用覆盖
+  var savedVer = state.values.SERVER_VERSION_STR;
+  var verItem = getItemByKey('SERVER_VERSION_STR');
+  if (verItem && /^easytier-cf-relay\/\d/.test(savedVer) && savedVer !== verItem.default) {
+    state.values.SERVER_VERSION_STR = verItem.default;
+  }
 
   function readSaved() {
     try {
@@ -96,7 +175,9 @@
 
   function save() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      var record = copyPlain(state);
+      record._defaults = currentDefaults;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(record));
     } catch (e) {
       /* ignore */
     }
@@ -654,11 +735,19 @@
         item.classList.toggle('has-warn', !!(res && res.level === 'warn'));
       }
     }
-    // 跨字段提示（房间分片 + KV 审计）
+    // 跨字段提示（房间分片 + KV 审计）+ 默认值自动跟随提示
     var extra = document.getElementById('gen-extra-msgs');
     if (extra) {
+      var extraHtml = '';
       if (results['@roomsAudit']) {
-        extra.innerHTML = '<div class="alert alert-warning"><p class="alert-title">注意</p><p>' + esc(results['@roomsAudit'].msg) + '</p></div>';
+        extraHtml += '<div class="alert alert-warning"><p class="alert-title">注意</p><p>' + esc(results['@roomsAudit'].msg) + '</p></div>';
+      }
+      if (adoptedKeys.length) {
+        extraHtml += '<div class="alert alert-note"><p class="alert-title">提示</p><p>配置基准已更新：以下未修改过的默认值已自动跟随最新版本——' +
+          esc(adoptedKeys.join('、')) + '。你手动修改过的项均保持不变。</p></div>';
+      }
+      if (extraHtml) {
+        extra.innerHTML = extraHtml;
         extra.classList.remove('hidden');
       } else {
         extra.innerHTML = '';

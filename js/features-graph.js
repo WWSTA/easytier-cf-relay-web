@@ -68,7 +68,7 @@
     },
     {
       id: 'observability', cat: 'ops', title: '观测升级（v1.6）',
-      desc: '<code>/metrics?format=prometheus</code> 输出 25 个 <code>easytier_</code> 指标可接 Grafana；可选配置账号级真实额度（GraphQL，token 只在服务端）；绑定 Analytics Engine 后总览新增近 24h / 7 天趋势折线（纯 SVG，零图表库）。',
+      desc: '<code>/metrics?format=prometheus</code> 输出 35 个 <code>easytier_</code> 指标可接 Grafana；可选配置账号级真实额度（GraphQL，token 只在服务端）；绑定 Analytics Engine 后总览新增近 24h / 7 天趋势折线（纯 SVG，零图表库）。',
       link: '额度观测与趋势 →', href: 'deploy.html#581-额度观测与趋势v16可选',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M4 16l4.5-4.5 3 3L16 9l4 4"/></svg>'
     },

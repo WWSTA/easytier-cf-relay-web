@@ -108,7 +108,8 @@
 <h1 id="easytier-cloudflare-relay-技术文档" class="heading-anchor"><a class="anchor" href="#easytier-cloudflare-relay-技术文档" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>EasyTier Cloudflare Relay — 技术文档</h1>
 <blockquote>
 <p>已完成功能清单 + 协议实现细节，逐项对标官方 easytier-core (Rust) 实现。
-实现版本：easytier-cf-relay/1.3.0 ｜ 协议对齐：easytier-core <strong>2.6.4</strong>（源码 tag v2.6.4）
+实现版本：easytier-cf-relay/1.7.0 ｜ 协议对齐：easytier-core <strong>2.6.4</strong> 行为语义；
+proto 来源：EasyTier-official main@81487c36（2026-08-24 快照，schema 与 v2.7.0 等价，见 §4.2）
 部署与使用见《<a href="deploy.html">部署手册</a>》。</p>
 </blockquote>
 <hr>
@@ -277,7 +278,7 @@
 <td>✅</td>
 </tr>
 <tr>
-<td>转发前校验 from_peer_id === 连接注册身份，伪造丢弃计数（v1.4.2 起覆盖全部 RPC 路径）</td>
+<td>转发前源身份校验（v1.4.2 引入，v1.7 B10 改直连在线判据：直连冒名丢弃计数、非直连按官方多跳语义放行）</td>
 <td>✅</td>
 </tr>
 <tr>
@@ -318,7 +319,7 @@
 </tr>
 </tbody></table></div>
 <p>| 结构化日志（debug~error 四级） | ✅ |
-| Prometheus 文本输出（<code>/metrics?format=prometheus</code>，26 个 <code>easytier_</code> 指标，v1.6.0） | ✅ |
+| Prometheus 文本输出（<code>/metrics?format=prometheus</code>，35 个 <code>easytier_</code> 指标，v1.6.0 起持续扩充至 v1.7） | ✅ |
 | 账号级真实额度（GraphQL Analytics API，token 仅服务端使用，缓存 5 分钟，v1.6.0） | ✅ |
 | Analytics Engine 趋势打点 + 管理页 SVG 趋势图（未绑定 AE 静默降级，v1.6.0） | ✅ |
 | 审计数据最小化（<code>AUDIT_IP_MASK</code> 打码 / <code>AUDIT_RETENTION_DAYS</code> 留存清理，v1.6.0） | ✅ |
@@ -430,6 +431,11 @@ RelayHandshake=20  RelayHandshakeAck=21
 </code></pre></div>
 <p>产物仅含 encode/decode，零运行时代码生成；<code>--force-long</code> + long.js 保证
 int64（transaction_id、session_id、peer_route_id）精度。</p>
+<p><strong>来源可复现（B5）</strong>：proto 实际取自官方仓库 EasyTier/EasyTier 本地克隆的
+main@<code>81487c36</code>（2026-08-24 快照，shallow clone 无 tag；schema 与 easytier-core
+v2.7.0 等价）——并非旧文档所称的「tag v2.6.4」。<code>regen_proto.sh</code> 启动即打印
+源仓库 commit 与提交日期，并把「源 commit + 生成日期 + 输入文件 sha256 摘要」
+写入 <code>src/proto_gen.js</code> 头注释；重跑产物与在库版本逐字节一致（同 pbjs 版本前提）。</p>
 <h3 id="43-握手对标-peer_managerrshandle_handshake" class="heading-anchor"><a class="anchor" href="#43-握手对标-peer_managerrshandle_handshake" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>4.3 握手（对标 <code>peer_manager.rs::handle_handshake</code>）</h3>
 <p>请求 <code>HandshakeRequest{ magic, my_peer_id, version, features[], network_name, network_secret_digest }</code>：</p>
 <ol>
@@ -756,37 +762,37 @@ DO 存储异常不应导致整个房间不可用。</p>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>easytier-cf-relay:rec:groups</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:groups</code></td>
 <td>网络分组事件</td>
 <td>create / delete（cause=admin/auto/digest-delete）</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:peers</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:peers</code></td>
 <td>节点事件</td>
 <td>join / leave / replace（含 IP）。<strong>拒绝（reject）不记录</strong>——被拉黑客户端会不断重连，逐条记录会刷爆列表并浪费写入额度，改由 <code>blRejected</code> 计数器观测</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:routes</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:routes</code></td>
 <td>路由条目事件</td>
 <td>add（direct/transit，含&quot;顶替 transit&quot;）/ remove（含原因）</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:peercenter</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:peercenter</code></td>
 <td>全局互联事件</td>
 <td>add / remove（admin / TTL expire）</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:sockets</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:sockets</code></td>
 <td>连接事件</td>
 <td>open / close / error（含 socketId、客户端 IP）</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:digests</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:digests</code></td>
 <td>摘要注册事件</td>
 <td>register / delete</td>
 </tr>
 <tr>
-<td><code>easytier-cf-relay:rec:admin</code></td>
+<td><code>easytier-cf-relay:&lt;room&gt;:rec:admin</code></td>
 <td>管理端审计（硬设置）</td>
 <td>login（IP/时间，同一 IP 10 分钟去重）/ op（操作明细）。<strong>查看（view）不记录</strong>（v1.3.0：管理页 10s 自动刷新会刷屏且徒增写入）</td>
 </tr>
@@ -810,9 +816,14 @@ DO 存储异常不应导致整个房间不可用。</p>
 <td>连接黑名单</td>
 <td>值为客户端 IP；断开连接时自动加入。<strong>Worker 入口边缘拦截只读这一条键</strong>（见 9.4）</td>
 </tr>
+<tr>
+<td><code>easytier-cf-relay:shed:active</code></td>
+<td>额度 shed 标记（v1.7 A5）</td>
+<td>全局键（无房间段），值为字符串 <code>true</code>/<code>false</code>；Worker 边缘层据此对新连接 429（见 9.4）</td>
+</tr>
 </tbody></table></div>
-<p>共 11 条键，全生命周期不变。记录类为定长环形缓冲（默认上限 100 条/类，
-管理页「记录设置」可单独调整）；黑名单上限为硬设置（<code>BLACKLIST_LIMIT</code>，默认 1000）。
+<p>键布局说明（v1.7 A3）：rec 键带<strong>房间段</strong>（<code>&lt;room&gt;</code> 默认 <code>global</code>，ROOM_HEADER/QUERY 分片时随房间隔离；每房间各一套）；bl 键与 shed 键为<strong>全局键</strong>（无房间段——边缘层在房间解析之前读取，且 IP 黑名单语义跨房间）。未分片部署共 <strong>11 条审计键 + 1 条 shed 标记键</strong>；分片部署 rec 键随房间数增长，且各房间对全局 bl 键为整数组覆盖写（已知限制：分片部署不做跨房间合并）。记录类为定长环形缓冲（代码缺省上限 100 条/类、发行配置 400 条/类，
+管理页「记录设置」可单独调整）；黑名单上限为硬设置（代码缺省 <code>BLACKLIST_LIMIT</code>=1000、发行配置 4000）。
 记录查询支持 <code>type=all</code>：七类记录在内存合并（每条附 <code>type</code> 字段），按全局 id
 （全局单调递增 = 时间序）倒序分页——不引入任何新 KV 键；<code>all</code> 模式删除按 id
 跨类型匹配，admin 硬记录永不删除。</p>
@@ -848,9 +859,9 @@ admin 类记录在管理页不可删除（防审计自擦除）；</li>
 </thead>
 <tbody><tr>
 <td><strong>Worker 入口边缘层</strong>（WebSocket 升级前，v1.3.0）</td>
-<td>socket（IP）</td>
-<td>读 <code>bl:socket</code> 一条键（v1.4.0 起 isolate 缓存，默认 30s），命中 403 + <code>Retry-After: 60</code></td>
-<td><strong>不唤醒 DO</strong>：被拉黑客户端的重连风暴只消耗 Worker 请求额度，不消耗 DO 请求与时长计费；KV 读每 TTL 至多 1 次</td>
+<td>socket（IP）/ 额度 shed</td>
+<td>读 <code>bl:socket</code> 与 <code>shed:active</code> 两条键（各自 isolate 缓存，默认 30s，v1.7 A5 起两键），命中分别 403 + <code>Retry-After: 60</code> / 429 + <code>Retry-After: 300</code></td>
+<td><strong>不唤醒 DO</strong>：被拉黑客户端的重连风暴与 shed 期新连接只消耗 Worker 请求额度，不消耗 DO 请求与时长计费；KV 读每 TTL 至多各 1 次</td>
 </tr>
 <tr>
 <td>DO 升级层</td>
@@ -862,6 +873,12 @@ admin 类记录在管理页不可删除（防审计自擦除）；</li>
 <td><strong>DO 升级层</strong>（事前限流，v1.4.1）</td>
 <td>并发（IP）</td>
 <td>同一 IP 开放连接数 ≥ <code>MAX_CONNS_PER_IP</code>（默认 6）时 429 + <code>Retry-After: 60</code>——黑名单之外的第二道升级闸门，攻击者无需触发任何警报即可被事前拦住；计数进 <code>counters.ipLimited</code></td>
+<td>1 次 DO 请求（本就要到达 DO 的升级）</td>
+</tr>
+<tr>
+<td><strong>DO 升级层</strong>（额度 shed，v1.7 A5）</td>
+<td>额度（全局）</td>
+<td><code>shed:active</code> 激活时新升级 429 + <code>Retry-After: 300</code>（与 per-IP 429 同形态零指纹；边缘层标记未生效/未绑定 <code>AUDIT_KV</code> 时由本层兜底）；已建立的 Hibernation 会话不走本路径、不受影响</td>
 <td>1 次 DO 请求（本就要到达 DO 的升级）</td>
 </tr>
 <tr>
@@ -889,8 +906,10 @@ admin 类记录在管理页不可删除（防审计自擦除）；</li>
 DO 现对「Upgrade 头 + 内部路径」的组合直接 404——堵住「伪造升级头绕过
 <code>ADMIN_TOKEN</code>/<code>METRICS_TOKEN</code> 直达内部端点（读统计/删记录）」的绕过路径
 （升级请求必须原样转发，入口层无法改写副本，故统一在 DO 层拦截）。
-另：未知路径的非升级请求在 Worker 入口被 tar pit（<code>TARPIT_UNKNOWN</code>，
-挂起不响应，不泄露 404 指纹；EasyTier 客户端只走升级不受影响）。</p>
+另：未知路径的非升级请求在 Worker 入口被 tar pit（<code>TARPIT_UNKNOWN</code>）——
+返回 <strong>200 + <code>application/octet-stream</code> 空体</strong>（非 404，不泄露端点存在性指纹；
+V-07 生产实测：body 立即关闭、无挂起，与本地 dev 行为一致；EasyTier 客户端
+只走升级不受影响）。真挂起备选实现暂不采用（备选：握手分支内挂起）。</p>
 </blockquote>
 <p>边缘层要点：</p>
 <ul>
@@ -904,7 +923,8 @@ WS 升级复用缓存的 <code>bl:socket</code> 解析结果——<strong>只延
 延后「KV 最终一致窗口（约 1 分钟）+ TTL」，窗口内由 DO 层兜底拦截；</li>
 <li>未绑定 <code>AUDIT_KV</code> 时边缘层自动跳过，仅 DO 层拦截（功能不变）；</li>
 <li>KV 读为「每 TTL 至多 1 次 + 冷启动」量级（免费额度 10 万读/天，重连风暴时
-也不再与重连次数成正比）。</li>
+也不再与重连次数成正比）；v1.7 A5 起边缘层多读 <code>shed:active</code> 一条键（独立
+30s 缓存，读失败维持上次值——shed 已激活时继续拒绝）。</li>
 </ul>
 <p>各层拒绝均<strong>不写记录</strong>，只递增 <code>counters.blRejected</code>（DO 层，总览页「黑名单拦截」
 可见；边缘层拒绝不经过 DO，不计数，可在 Cloudflare 分析中查看）。</p>
@@ -914,10 +934,22 @@ digest 类（被删注册的完整粒度）；断开连接 → socket 类（已�
 存量 group 类数据与手工添加的纯网络名格式继续生效（digest 类回退匹配）。
 黑名单页支持手工添加、单个/批量移除（解除封锁）与清空。</p>
 <blockquote>
-<p><strong>RPC 源绑定（v1.4.2，外部审查修复）</strong>：全部 RPC（请求与响应、无论目标是
-服务端还是经转发的其它节点）统一校验——未握手连接不处理；包头 <code>from_peer_id</code>
-必须与连接注册身份一致，否则丢弃并计入 <code>counters.forgeries</code>。修复前
-server-destined 分支不经过转发路径的身份校验，存在冒名自报覆盖路由的盲区。</p>
+<p><strong>RPC 源绑定（v1.4.2 引入，v1.7 B10 修正）</strong>：全部 RPC（请求与响应、无论目标是
+服务端还是经转发的其它节点）统一校验——未握手连接不处理也不转发（V-03 不退）；
+<code>from_peer_id</code> ≠ 连接注册身份时按<strong>直连在线判据</strong>区分：
+① 被声称身份在本组<strong>直连在线</strong>（有自己的连接）→ 确证伪造：丢弃并计入
+<code>counters.forgeries</code>（冒名 SyncRouteInfo 覆盖路由 / 冒名 ReportPeers 覆盖
+PeerCenter 直连表 / 伪造 RpcResp 清会话的防线不退）；
+② 被声称身份<strong>非直连</strong> → 按官方多跳转发语义放行（转发保持原始 from，计入
+<code>counters.forwardedFrom</code>）。v1.4.2 的无差别「from ≡ 连接身份」校验在官方
+多跳语义下误伤父节点替子节点的转发（生产 2026-11-21 实锤 <code>drop forged rpc</code>
+持续触发，子节点密集网络的 RPC 全部被丢）；官方客户端非 secure 模式本就
+不做连接身份校验。
+<strong>安全边界明示</strong>：判据 ② 意味着「非直连身份」可被同组连接冒名——与官方
+非 secure 模式暴露面等同（端到端加密在客户端层完成）；确证伪造的判定依赖
+直连注册表，覆盖一切「受害者已直连」场景。收紧路径：部署 <code>NETWORK_SECRETS</code>
+或等待 secure mode（v2.0 B1）。转发路径对 <code>from = 服务端自身</code> 保持硬拒
+（冒充中继不受 B10 放宽影响）。</p>
 </blockquote>
 <h3 id="95-事件来源挂钩点" class="heading-anchor"><a class="anchor" href="#95-事件来源挂钩点" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>9.5 事件来源（挂钩点）</h3>
 <ul>
@@ -1003,7 +1035,7 @@ DO storage 与 KV 镜像。空闲期 alarm 退避至 300s 不影响清理粒度
 </thead>
 <tbody><tr>
 <td>握手 + 路由同步</td>
-<td>✅ <code>easytier-cli peer</code> 显示 <code>easytier-cf-relay / easytier-cf-relay/1.0.0 / ws / p2p</code>，延迟 ~2-4ms</td>
+<td>✅ <code>easytier-cli peer</code> 显示 <code>easytier-cf-relay / easytier-cf-relay/1.7.0 / ws / p2p</code>，延迟 ~2-4ms</td>
 </tr>
 <tr>
 <td>双节点互见</td>
@@ -1106,8 +1138,7 @@ easytier-cli --rpc-portal 127.0.0.1:15888 peer   # 应见 easytier-cf-relay 与 
 │   ├── siphash.js        # SipHash-1-3（network_secret 摘要）+ hex/随机字节
 │   └── constants.js      # 协议常量（PacketType/flags/MAGIC…）
 ├── tools/
-│   ├── regen_proto.sh    # 从官方 .proto 重新生成 proto_gen.js
-│   └── make_release.mjs  # 发行流程脚本（白名单复制/清理规则/禁词扫描/--check）
+│   └── regen_proto.sh    # 从官方 .proto 重新生成 proto_gen.js
 ├── wrangler.toml         # 部署配置（变量说明见部署手册）
 └── docs/                 # 技术文档 / 部署手册 / 更新日志
 </code></pre></div>

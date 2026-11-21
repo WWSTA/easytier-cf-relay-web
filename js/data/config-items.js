@@ -1,7 +1,7 @@
 /**
  * config-items.js — wrangler.toml 生成器的配置项定义
  *
- * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.6.2）为唯一基准：
+ * 默认值与注释以项目真实 wrangler.toml（easytier-cf-relay v1.7.0）为唯一基准：
  *   - comment 逐字复制 wrangler.toml 里对应变量上方的注释（含多行，用 \n 分行）；
  *     wrangler.toml 没写注释的变量（SERVER_HOSTNAME / SERVER_VERSION_STR /
  *     ROUTE_INFO_TTL_MS / ADMIN_AUDIT_LIMIT / ROOM_*）comment 留空，生成时不输出；
@@ -74,7 +74,7 @@ window.ETCF_CONFIG = {
           key: 'SERVER_VERSION_STR',
           label: '节点版本串',
           type: 'text',
-          default: 'easytier-cf-relay/1.6.2',
+          default: 'easytier-cf-relay/1.7.0',
           comment: '',
           help: 'easytier-cli peer 中可见的版本号，随版本发布更新（wrangler.toml 未加注释）。',
         },

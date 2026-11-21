@@ -250,7 +250,7 @@ curl http://127.0.0.1:8787/health
 </tr>
 <tr>
 <td><code>SERVER_VERSION_STR</code></td>
-<td><code>easytier-cf-relay/1.6.2</code></td>
+<td><code>easytier-cf-relay/1.7.0</code></td>
 <td>节点版本串（<code>easytier-cli peer</code> 可见）</td>
 </tr>
 </tbody></table></div>
@@ -396,7 +396,7 @@ curl http://127.0.0.1:8787/health
 <tr>
 <td><code>TARPIT_UNKNOWN</code></td>
 <td><code>1</code></td>
-<td>未知路径 tar pit（v1.4.1）：非 WS 升级请求访问未知路径时挂起不响应——不返回 404、不泄露行为指纹，让路径扫描器空等；EasyTier 客户端只走升级、保留路径（health/favicon/metrics/admin）各有响应，均不受影响；<code>0</code> = 关闭（恢复 404）</td>
+<td>未知路径 tar pit（v1.4.1）：非 WS 升级请求访问未知路径时返回 <strong>200 空体</strong>（<code>application/octet-stream</code>）——不返回 404、不泄露行为指纹（v1.7 V-07 生产实测：无挂起，body 立即关闭）；EasyTier 客户端只走升级、保留路径（health/favicon/metrics/admin）各有响应，均不受影响；<code>0</code> = 关闭（恢复 404）</td>
 </tr>
 <tr>
 <td><code>NETWORK_SECRETS</code></td>
@@ -489,7 +489,12 @@ npx wrangler deploy
 </tbody></table></div>
 <p>KV 键布局与写入策略详见技术文档 §9。免费额度核算：
 KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 144 写/天，
-实际仅在有新事件的周期产生写入（典型小网络全类合计每天数十次），远低于限额；
+实际仅在有新事件的周期产生写入（典型小网络全类合计每天数十次），远低于限额。
+<strong>总量口径</strong>：审计共 11 条键（7 记录 + 4 黑名单），全部持续脏时数学上限
+144 × 11 = 1,584 写/天 &gt; 免费 1,000——v1.7 起内置<strong>日预算门禁</strong>（缺省 900，
+预留 10% 余量）：达到预算按牺牲序跳过低优键（routes / peercenter / digests
+先牺牲，黑名单键永不跳），把写入结构性压回预算内；管理页统计卡与 <code>/metrics</code>
+可见预算跳过与写失败计数；
 读取主要为两处——冷启动且 DO storage 为空时（每键一次）与 WebSocket 升级时的
 边缘黑名单检查（只读 <code>bl:socket</code> 一条键，v1.4.0 起有 isolate 缓存：默认每 30s
 至多一次 KV 读，重连风暴时也只消耗每 TTL 一次读取）。</p>
@@ -510,8 +515,8 @@ KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 14
 <p><strong>事前限流</strong>（v1.4.1）：黑名单是事后拦截（需管理员操作或攻击已发生），
 单 IP 并发连接上限（<code>MAX_CONNS_PER_IP</code>，DO 升级层）补上事前缺口——同一 IP
 的开放连接数达到上限后直接 429，无需先进入黑名单；拦截次数见总览页
-「IP 限流」计数（<code>ipLimited</code>）。另：未知路径的非升级请求会被挂起不响应
-（tar pit，<code>TARPIT_UNKNOWN</code>），不泄露 404 与行为指纹。</p>
+「IP 限流」计数（<code>ipLimited</code>）。另：未知路径的非升级请求会收到 200 空体
+（tar pit，<code>TARPIT_UNKNOWN</code>，v1.7 V-07 生产实测无挂起），不泄露 404 与行为指纹。</p>
 <p><strong>KV 键前缀</strong>（v1.4.1 起更名为 <code>easytier-cf-relay:</code>，此前为 <code>et-relay:</code>）：
 首次启动新版本时自动把旧键数据迁移到新键（旧键保留不删，确认运行正常后可
 在 Cloudflare 控制台手动清理）；无需任何手工操作。</p>
@@ -549,7 +554,7 @@ KV 免费计划 1000 写/天——默认 10 分钟节流下每键理论最大 14
 <tbody><tr>
 <td><code>HEALTH_PATH</code></td>
 <td><code>/health</code></td>
-<td>健康检查路径（v1.4.0）。配置后仅该路径返回 <code>{&quot;ok&quot;:true}</code>，原 <code>/health</code> 不再暴露（404 或随 tar pit 挂起；无需 token）</td>
+<td>健康检查路径（v1.4.0）。配置后仅该路径返回 <code>{&quot;ok&quot;:true}</code>，原 <code>/health</code> 不再暴露（404 或随 tar pit 返回 200 空体；无需 token）</td>
 </tr>
 <tr>
 <td><code>METRICS_PATH</code></td>
@@ -593,7 +598,7 @@ v1.6.0 起「额度观测 / 趋势」在服务端报告未配置 CF 凭证后，
 跳过后续轮询（卡内提供「重新检测」入口），避免空转请求。</li>
 </ul>
 <p><strong>Prometheus 文本输出（v1.6.0）</strong>：启用 <code>/metrics</code> 后，追加 <code>?format=prometheus</code>
-即输出 Prometheus text exposition format（<code>text/plain; version=0.0.4</code>），26 个
+即输出 Prometheus text exposition format（<code>text/plain; version=0.0.4</code>），35 个
 <code>easytier_</code> 命名空间指标（无 label 防高基数）：<code>easytier_peers</code> / <code>easytier_groups</code> /
 <code>easytier_uptime_seconds</code> / <code>easytier_sockets</code> / <code>easytier_sockets_handshaked</code>（gauge）
 与 <code>easytier_msgs_in_total</code> / <code>easytier_msgs_out_total</code> /
@@ -701,7 +706,7 @@ INFO CORE::INSTANCE: new peer added peer_id=10000001
 | ipv4          | hostname | cost  | lat(ms) | tunnel | version           |
 |---------------|----------|-------|---------|--------|-------------------|
 | 10.126.0.1/24 | nodeA    | Local | -       | -      | 2.6.4-8428a89d    |
-|               | easytier-cf-relay | p2p   | 3.88    | ws     | easytier-cf-relay/1.6.2 |
+|               | easytier-cf-relay | p2p   | 3.88    | ws     | easytier-cf-relay/1.7.0 |
 | 10.126.0.2/24 | nodeB    | relay(2) | 18.00 |        | 2.6.4-8428a89d    |
 </code></pre></div>
 <h3 id="62-windows-gui-macos-gui-手机端" class="heading-anchor"><a class="anchor" href="#62-windows-gui-macos-gui-手机端" aria-label="锚点链接"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="m7.775 3.275a.75.75 0 0 0 1.06 1.06l1.25-1.25a2 2 0 1 1 2.83 2.83l-2.5 2.5a2 2 0 0 1-2.83 0 .75.75 0 0 0-1.06 1.06 3.5 3.5 0 0 0 4.95 0l2.5-2.5a3.5 3.5 0 0 0-4.95-4.95l-1.25 1.25Zm-4.69 9.64a2 2 0 0 1 0-2.83l2.5-2.5a2 2 0 0 1 2.83 0 .75.75 0 0 0 1.06-1.06 3.5 3.5 0 0 0-4.95 0l-2.5 2.5a3.5 3.5 0 0 0 4.95 4.95l1.25-1.25a.75.75 0 0 0-1.06-1.06l-1.25 1.25a2 2 0 0 1-2.83 0Z"/></svg></a>6.2 Windows GUI / macOS GUI / 手机端</h3>
@@ -769,7 +774,7 @@ INFO CORE::INSTANCE: new peer added peer_id=10000001
 <tr>
 <td>KV 写</td>
 <td>1,000 / 天</td>
-<td>启用 KV 审计后：事件按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）节流镜像，每键理论最大 144 写/天；拒绝/查看事件不产生写入</td>
+<td>启用 KV 审计后：事件按 <code>RECORD_FLUSH_MS</code>（默认 10 分钟）节流镜像，每键理论最大 144 写/天（11 键全脏数学上限 1,584/天 &gt; 1,000——v1.7 起日预算门禁压回 900 内，黑名单键永不牺牲）；拒绝/查看事件不产生写入</td>
 </tr>
 <tr>
 <td>KV 读</td>
@@ -798,6 +803,19 @@ DO 请求与 KV 写入均零消耗；v1.4.0 起边缘层 KV 读有 30s 缓存，
 风暴期间 KV 读也不再与重连次数成正比；</li>
 <li>结论：<strong>免费额度内稳定运行</strong>。超出时可升级 Workers Paid（$5/月起，含 100 万请求/月 + 40 万 GB-s/月）。</li>
 </ul>
+<p><strong>事前拒绝层：zone WAF Rate Limiting（可选，唯一零额度拒绝手段）</strong>。WAF 限速在
+请求到达 Worker <strong>之前</strong>执行，被拦请求不消耗 Worker 请求额度（本服务管理端拉黑的
+403 仍各计 1 次 Worker 请求）。免费计划含 1 条限速规则，在 Dashboard → 安全 →
+WAF → Rate limiting 手工配置。规则模板（示意，以控制台当前界面为准）：</p>
+<ul>
+<li>匹配表达式：<code>(http.host eq &quot;&lt;你的域名&gt;&quot;) and not any(http.request.headers[&quot;upgrade&quot;][*] in {&quot;websocket&quot;})</code>
+——<strong>避开 <code>Upgrade: websocket</code> 的请求</strong>，不误伤正常客户端（WS 升级一律放行）；</li>
+<li>速率：如同一 IP 每分钟 &gt; 60 个请求则 Block（持续 1 分钟）；</li>
+<li>用途：缓解非 WS 的 HTTP 洪泛与异常重试轰炸；WS 层重连风暴仍依赖本服务的
+边缘黑名单（Q12）与额度耗尽防线（Q13）。</li>
+</ul>
+<p>注意：WAF 规则属 zone 级配置，本服务不感知、不统计其拦截；启用前请先在低峰期
+验证表达式不误伤正常客户端。</p>
 <p>计费细节参见 Cloudflare 官方文档：</p>
 <ul>
 <li><a href="https://developers.cloudflare.com/durable-objects/platform/pricing/" target="_blank" rel="noopener noreferrer">Durable Objects 定价</a></li>
@@ -812,7 +830,7 @@ DO 请求与 KV 写入均零消耗；v1.4.0 起边缘层 KV 读有 30s 缓存，
 <div class="code-block" data-lang="bash"><pre><code class="language-bash"># 健康检查：零指纹（P0 整改后仅返回 {&quot;ok&quot;:true}）
 curl https://et.example.com/health
 # {&quot;ok&quot;:true}
-# 配置 HEALTH_PATH 后：curl https://et.example.com&lt;HEALTH_PATH&gt;（原 /health 不再暴露：404 或 tar pit 挂起）
+# 配置 HEALTH_PATH 后：curl https://et.example.com&lt;HEALTH_PATH&gt;（原 /health 不再暴露：404 或 tar pit 返回 200 空体）
 
 # 统计：自定义安全路径 + token（未配置 METRICS_PATH/METRICS_TOKEN 时 404）
 curl -H &quot;Authorization: Bearer &lt;METRICS_TOKEN&gt;&quot; https://et.example.com&lt;m-metrics-path&gt;
@@ -1037,7 +1055,32 @@ v1.3.0 起：拒绝发生在 Worker 入口边缘层（读 KV 的 <code>bl:socket
 isolate 缓存（<code>IP_BLOCK_CACHE_MS</code>，默认 30s）：重连风暴时 KV 读从每次连接
 1 次降为每 30s 至多 1 次，只延后拦截、绝不漏放（DO 层权威兜底）。
 若确有恶意 IP 长期轰炸，可在 Cloudflare 控制台配置 WAF/IP Access Rules 在更外层拦截。</p>
-<p><em>本手册对应实现版本：easytier-cf-relay/1.6.2（协议对齐 easytier-core 2.6.x）。技术实现细节见《<a href="technical.html">技术文档</a>》。</em></p>
+<p><strong>Q12：免费额度耗尽（Error 1027）怎么办？</strong>
+症状：所有端点同时失联——健康检查、管理端、WebSocket 升级全部返回
+<code>Error 1027</code>，即 Workers / Durable Objects 每日免费请求额度（各 100,000/天）
+用尽，直至当日 <strong>UTC 0 点（北京早 8 点）<strong>额度复位。定位：Cloudflare Dashboard
+→ Workers &amp; Pages → 用量页，查看 Workers 请求与 DO 请求两条日曲线是否触顶
+（对照自服务总览页的额度观测卡可区分是否本服务消耗）。临时措施：升级
+Workers Paid（$5/月）立即解锁，无需等复位。自愈与防线：v1.7 起内置</strong>优雅降级</strong>——
+账号 <strong>Worker 请求</strong>用量超过 90% 时新连接被 429 拒绝（已建立的 Hibernation 会话
+不消耗 Worker 请求额度、不受影响，存量 mesh 继续运行到当日复位），用量回落后
+自动恢复。口径与边界：① 阈值只看 GraphQL <code>requests</code> 单维（每 15 分钟检查一次，
+粒度为分钟级）；② 未配置 CF 凭证的部署回退为服务端自计数粗估；<strong>已配置凭证但
+查询失败（如 token 失效）时不会 shed</strong>——请定期核对额度卡真实数据；③ 若耗尽的是
+<strong>DO 请求</strong>配额（Hibernation 会话的入站消息主要消耗 DO 请求），已建立会话仍可能
+失败——shed 只能为 Worker 墙提前止损；④ 大路由表网络（约上百节点）的路由同步会
+产生每秒数十条消息，建议将 <code>MSG_RATE_LIMIT_PER_SEC</code> 调至 100~200 留余量。
+常见诱因与配套防线：重连风暴见 Q12（v1.7 起限流违规自动临时拉黑）、
+事前拒绝层 WAF 模板见 §7。</p>
+<p><strong>Q13：IPv6 客户端可以接入吗？</strong>
+可以，传输层<strong>零配置</strong>：Cloudflare 边缘默认双栈（域名 AAAA 记录自动生效），
+服务端全链路以字符串处理客户端 IP（无 IPv4 假设），v1.6.0 起审计 IP 打码已含
+IPv6（保留前 4 组）；IPv6-only 节点经生产实测可长时间稳定在线。移动网络客户端
+优先走 IPv6 时同样适用（参考 README「移动设备/受限网络链路」说明）。注意区分
+两件事：本条是<strong>客户端经 IPv6 传输层接入</strong>（开箱即用）；而「服务端虚拟网卡宣告
+IPv6 子网用于 P2P 打洞」属协议层能力——受 Workers 无 UDP 出口的架构限制，
+明确不支持。</p>
+<p><em>本手册对应实现版本：easytier-cf-relay/1.7.0（协议对齐 easytier-core 2.6.x）。技术实现细节见《<a href="technical.html">技术文档</a>》。</em></p>
 
 </section>
   </main>
